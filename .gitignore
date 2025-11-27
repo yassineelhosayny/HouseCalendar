@@ -1,0 +1,9 @@
+# File compilati
+*.class
+
+# Cartelle generate automaticamente
+bin/
+out/
+
+# File di sistema
+.DS_Store
