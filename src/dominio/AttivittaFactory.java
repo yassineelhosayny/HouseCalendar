@@ -7,11 +7,11 @@ public class AttivittaFactory {
     public static Attivita createAttivita(String tipo) { 
         switch (tipo) {
             case "Spesa":
-                return new AttivitaSpesa();
+                return new AttivitaSpesa(/* mancano attributi*/);
             case "Studio":
-                return new AttivitaStudio();
+                return new AttivitaStudio(/* mancano attributi*/);
             case "Domestica":
-                return new AttivitaDomestica();
+                return new AttivitaDomestica(/* mancano attributi*/;
             default:
                 throw new IllegalArgumentException("Tipo di attività non riconosciuto: " + tipo);
         }
