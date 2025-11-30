@@ -1,7 +1,7 @@
 package dominio;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+
 
 public abstract class Attivita {
     
@@ -9,7 +9,7 @@ public abstract class Attivita {
     protected String descrizione;
     protected TipoAttivita tipo;
     protected int id;
-    private static int contatoreId = 0;
+    private static   int contatoreId = 0;
     protected LocalDate dataScadenza;
     protected LocalDate dataNotifica;
     protected int priorita;
