@@ -24,8 +24,8 @@ public abstract class Attivita {
     }
 
     //costrutorre generale per Attivita
-    public Attivita(String descrizione, TipoAttivita tipo,int id, LocalDate dataScadenza, LocalDate dataNotifica, int priorita, Utente utenteAssegnato, boolean attivitaPrivata) {
-        if(dataNotifica.isAfter(dataScadenza) || dataScadenza.isAfter(LocalDate.now()) || dataNotifica.isAfter(LocalDate.now() )){
+    public Attivita(String descrizione, TipoAttivita tipo, LocalDate dataScadenza, LocalDate dataNotifica, int priorita, Utente utenteAssegnato, boolean attivitaPrivata) {
+        if(dataNotifica.isAfter(dataScadenza) || !dataScadenza.isAfter(LocalDate.now()) || !dataNotifica.isAfter(LocalDate.now() )){
             throw new IllegalArgumentException("La data di notifica non può essere successiva alla data di scadenza.");
         }
         if(priorita < 1 || priorita > 3){
@@ -42,7 +42,6 @@ public abstract class Attivita {
         }  
         this.descrizione = descrizione;
         this.tipo = tipo;
-        this.id = id;
         this.dataScadenza = dataScadenza;
         this.dataNotifica = dataNotifica;
         this.priorita = priorita;
