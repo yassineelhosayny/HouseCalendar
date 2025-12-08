@@ -24,7 +24,8 @@ public class UtenteTest {
 	public void setUp() {
 		u1= new Utente("yassine","elhosayny@gmail.com","12345678");
 		u2= new Utente("marco","marco@gmail.com","87654321");
-		a1= new AttivittaFactory().crea("Compra Latte",TipoAttivita.SPESA, LocalDate.parse("2026-04-12"), LocalDate.parse("2026-04-06"), 2, u1, false);
+		new AttivittaFactory();
+		a1= AttivittaFactory.crea("Compra Latte",TipoAttivita.SPESA, LocalDate.parse("2026-04-12"), LocalDate.parse("2026-04-06"), 2, u1, false);
 	}
 	@After
 	public void tearDown() {
