@@ -10,7 +10,6 @@ public abstract class Attivita {
     protected String descrizione;
     protected TipoAttivita tipo;
     protected int id;
-    private static   int contatoreId = 0;
     protected LocalDateTime dataInizio;
     protected LocalDateTime dataFine;
     protected LocalDateTime dataNotifica;
@@ -19,11 +18,6 @@ public abstract class Attivita {
     protected Utente utenteAssegnato;
     protected boolean attivitaPrivata; //visibile solo all'utente assegnato
     
-
-    //blocco statico per gestione id univoci
-     {
-        this.id = ++contatoreId;
-    }
 
     //costrutorre generale per Attivita
     public Attivita(String descrizione, TipoAttivita tipo, LocalDateTime dataInizio, LocalDateTime dataFine, LocalDateTime dataNotifica, int priorita, Utente utenteAssegnato, boolean attivitaPrivata) {
@@ -52,6 +46,7 @@ public abstract class Attivita {
         
         this.descrizione = descrizione;
         this.tipo = tipo;
+        this.id=-1; //default prima il salva sulla DB e la generazione di Id
         this.dataInizio = dataInizio;
         this.dataFine = dataFine;
         this.dataNotifica = dataNotifica;
@@ -103,7 +98,9 @@ public abstract class Attivita {
     }
      
     //setter
-    
+    public void setId(int id){
+        this.id = id;
+    }
     public void setDescrizione(String descrizione) {
     	
     	if(descrizione == null || descrizione.isEmpty()) {

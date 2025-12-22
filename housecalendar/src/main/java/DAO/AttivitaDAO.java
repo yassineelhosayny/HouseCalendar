@@ -6,9 +6,9 @@ public class AttivitaDAO {
     
 
     // metodo aggiungiAttivita(attivita);
-    public static void aggiungiAttivita(Attivita a) {
+    public static int  aggiungiAttivita(Attivita a) {
         // tobe implemented
-       
+       return 0;
     }
 
 }

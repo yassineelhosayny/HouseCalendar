@@ -47,8 +47,10 @@ public class AttivitaGestioneImp implements AttivitaGestione {
             throw new IllegalArgumentException("tempo occupatoooo");
         }
 
-        gestoreAttivita.aggiungiAttivita(a); //aggiungere l'attivita al la lista in il gestore o RAM
-        AttivitaDAO.aggiungiAttivita(a);  // aggiungere L'attivita alla data base " da implimentare dopo"
+       
+      int id =  AttivitaDAO.aggiungiAttivita(a);  // aggiungere L'attivita alla data base " da implimentare dopo"
+      a.setId(id); //set del id generato dal database
+      gestoreAttivita.aggiungiAttivita(a); //aggiungere l'attivita al la lista in il gestore o RAM
 
         
     }
