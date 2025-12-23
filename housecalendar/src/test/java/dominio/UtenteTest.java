@@ -9,7 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +29,8 @@ public class UtenteTest {
 		u1= new Utente("yassine","yassineelhosayny99@gmail.com","12345678");
 		u2= new Utente("marco","marco@gmail.com","87654321");
 
-		new AttivittaFactory();
-		a1= AttivittaFactory.crea("Compra Latte",TipoAttivita.SPESA, LocalDate.parse("2026-04-12"), LocalDate.parse("2026-04-06"), 2, u1, false,"familia");
+		new AttivitaFactory();
+		a1= AttivitaFactory.crea("Compra Latte",TipoAttivita.SPESA,LocalDateTime.parse("2026-04-12T08:00") , LocalDateTime.parse("2026-04-12T10:00"), LocalDateTime.parse("2026-04-06T08:00"), 2, u1, false,"familia");
 	}
 	@AfterEach
 	public void tearDown() {

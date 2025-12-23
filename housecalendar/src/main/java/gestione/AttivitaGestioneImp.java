@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observer;
 
+import dataBase.DAO.AttivitaDAO;
 import dominio.Attivita;
 import dominio.AttivitaFactory;
 import dominio.GestoreAttivita;
 import dominio.TipoAttivita;
 import dominio.Utente;
-import DAO.AttivitaDAO;
 
 public class AttivitaGestioneImp implements AttivitaGestione {
      GestoreAttivita gestoreAttivita = GestoreAttivita.getInstance();

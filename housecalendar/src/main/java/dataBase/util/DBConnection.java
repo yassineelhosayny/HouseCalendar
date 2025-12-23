@@ -1,4 +1,4 @@
-package com.dbconnection.util;
+package dataBase.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
