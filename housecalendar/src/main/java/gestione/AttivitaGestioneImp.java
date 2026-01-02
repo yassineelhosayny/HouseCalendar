@@ -66,8 +66,41 @@ public class AttivitaGestioneImp implements AttivitaGestione {
 
     @Override
     public void modificaAttivita(int id, Map<String, Object> nuoviParametri) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'modificaAttivita'");
+        String descrizione = (String)nuoviParametri.get("descrizione");
+        TipoAttivita tipo = (TipoAttivita) nuoviParametri.get("tipo");
+        LocalDateTime dataInizio =(LocalDateTime) nuoviParametri.get("dataInizio");
+        LocalDateTime dataFine =(LocalDateTime) nuoviParametri.get("dataFine");
+        LocalDateTime dataNotifica = (LocalDateTime) nuoviParametri.get("dataNotifica");
+        Integer priorita = (Integer)nuoviParametri.get("priorita"); 
+        Utente utenteAssegnato = (Utente) nuoviParametri.get("utenteAssegnato");
+        Boolean attivitaPrivata =(Boolean) nuoviParametri.get("attivitaPrivata");
+        String context = (String) nuoviParametri.get("context");
+        
+        //controlli
+        if (descrizione == null || tipo == null || dataInizio == null || dataFine == null ||
+        dataNotifica == null || priorita == null || utenteAssegnato == null || attivitaPrivata == null) 
+           {
+        throw new IllegalArgumentException("Errore: Parametri mancanti o null.");
+           }
+        if (dataNotifica.isAfter(dataInizio) || dataNotifica.isBefore(LocalDateTime.now())) {
+                 throw new IllegalArgumentException("Errore: La data di notifica non può essere nel passato o successiva alla data dell'evento.");
+            }
+
+        if(dataInizio.isAfter(dataFine)){
+            throw new IllegalArgumentException("Errore: La data di Inizio no pò essere successiva alla data Fine del evento.");
+        }
+         Attivita a = AttivitaFactory.crea(descrizione,tipo, dataInizio,dataFine, dataNotifica, (int)priorita, utenteAssegnato, (boolean) attivitaPrivata,context);
+        if(verificaConflitti(a)){
+            throw new IllegalArgumentException("Errore: Ttempo occupatoooo");
+        }
+        if(gestoreAttivita.getAttivitaById(id) == null){
+             throw new IllegalArgumentException("Errore: Attivita non esiste");
+        }
+      boolean success= AttivitaDAO.updateAttivita(a);  
+       
+      if(success)
+        gestoreAttivita.modificaAttivita(id, a); 
+
     }
 
     @Override

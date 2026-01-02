@@ -11,4 +11,9 @@ public class AttivitaDAO {
        return 0;
     }
 
+    public static boolean updateAttivita(Attivita a) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateAttivita'");
+    }
+
 }

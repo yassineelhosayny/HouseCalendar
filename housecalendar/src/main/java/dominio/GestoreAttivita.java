@@ -18,6 +18,7 @@ public class GestoreAttivita implements SoggettoOsservabile {
     private static GestoreAttivita instance = new GestoreAttivita();;     // Singleton
      private List<Osservatore> osservatori = new ArrayList<>();
     private List<Attivita> listaAttivita = new ArrayList<>();
+    
     //strategia corrente di ordinamento (Strategy Pattern)
     private StrategiaOrdinamento strategiaOrdinamento;
 
