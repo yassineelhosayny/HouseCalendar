@@ -1,19 +1,16 @@
 package gestione;
 import dominio.Attivita;
 import dominio.TipoAttivita;
-import observer.Osservatore;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Observer;
+
 
 //classe per la gestione delle attività
 public interface AttivitaGestione {
     //dobbiamo definire i metodi per la gestione delle attività
-
-        public static List<Attivita> lista = null;
-
             // CRUD
         public void aggiungiAttivita( Map<String, Object> parametri);
         public void modificaAttivita(int id, Map<String, Object> nuoviParametri);

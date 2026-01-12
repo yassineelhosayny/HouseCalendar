@@ -1,43 +1,60 @@
 package gestione;
 
-import java.util.Observer;
+import dataBase.DAO.UtenteDAO;
+import dominio.Utente;
 
-import observer.Osservatore;
-import observer.SoggettoOsservabile;
-
-//classe per la gestione del login degli utenti
 public class LoginGestione {
-    // Gestione autenticazione
-        
-        public boolean login(String username, String password){
-            return false;
-        };
-        public void logout(){
-            
-        }
-        public boolean isLoggato(){
-            return false;
-        }
-        public String getUtenteAttuale(){
-            return null;
-        }
 
-        // Observer
-        public void aggiungiObserver(Osservatore obs){
-            
-        }
-        public void rimuoviObserver(Osservatore obs){
-            
-        }
-        public void notificaObservers(String evento){
+    // utente attualmente loggato (in memoria)
+    private Utente utenteAttuale;
 
-        }
-
-        // Utenti (opzionale)
-        public void registraUtente(String username, String password){
-
-        }
-        public boolean esisteUtente(String username){
+    // LOGIN
+    public boolean login(String email, String password) {
+        if (email == null || password == null ||
+            email.isBlank() || password.isBlank()) {
             return false;
         }
+
+        // controllo credenziali nel DB
+        boolean ok = UtenteDAO.checkLogin(email, password);
+
+        if (ok) {
+            // carico l'utente dal DB e lo salvo come utente corrente
+            utenteAttuale = UtenteDAO.getUtenteByEmail(email);
+            return true;
+        }
+
+        return false;
+    }
+
+    //logout
+    public void logout() {
+        utenteAttuale = null;
+    }
+
+    // è loggato
+    public boolean isLoggato() {
+        return utenteAttuale != null;
+    }
+
+    //utente attuale
+    public Utente getUtenteAttuale() {
+        return utenteAttuale;
+    }
+
+    //REGISTRAZIONE 
+    public boolean registraUtente(String nome, String email, String password) {
+        if (nome == null || email == null || password == null ||
+            nome.isBlank() || email.isBlank() || password.isBlank()) {
+            return false;
+        }
+
+        //controllo se esiste già
+        if (UtenteDAO.getUtenteByEmail(email) != null) {
+            return false;
+        }
+        //altramenti crea utente
+        Utente nuovo = new Utente(nome, email, password);
+        return UtenteDAO.aggiungiUtente(nuovo);
+    }
 }

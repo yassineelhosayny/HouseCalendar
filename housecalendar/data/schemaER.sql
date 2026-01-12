@@ -15,5 +15,5 @@ CREATE TABLE IF NOT EXISTS attivita (
   attivita_privata INTEGER NOT NULL,   -- 0 o 1
   context TEXT,                        -- negozioo materia o stanza
   utente_email TEXT NOT NULL,
-  FOREIGN KEY (utente_email) REFERENCES utente(email)
+   FOREIGN KEY (utente_email) REFERENCES utente(email)
 );
