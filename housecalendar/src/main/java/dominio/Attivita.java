@@ -79,6 +79,9 @@ public abstract class Attivita {
     public TipoAttivita getTipo() {
         return this.tipo;
     }
+    public  int getPriorita(){
+        return this.priorita;
+    };
     
     public boolean isCompletato() {
         return this.completato;
@@ -148,6 +151,9 @@ public abstract class Attivita {
     public void setCompletato(boolean completato) {
     	this.completato = completato;
     }
+    public void setTipo (TipoAttivita tipo) {
+    	this.tipo = tipo;
+    }
 
     public void setUtenteAssegnato(Utente utenteAssegnato) {
         if(utenteAssegnato == null) {
@@ -185,5 +191,13 @@ public abstract class Attivita {
                 + dataInizio + ", dataFine="+ dataFine + ", dataNotifica=" + dataNotifica + ", priorita=" + priorita + ", completato="
                 + completato + ", utenteAssegnato=" + utenteAssegnato + ", attivitaPrivata=" + attivitaPrivata + "]";
     }
+
+
+    
+
+
+
+
+  
 
 }

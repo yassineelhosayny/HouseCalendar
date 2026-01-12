@@ -14,7 +14,7 @@ public class DBConnection {
 	private static void init() {
 	
 			dbDriver= "org.sqlite.JDBC";
-			dbURL= "jdbc:sqlite:/Users/serena/Documents/UniLavoro/UPO/Materie/IngegneriaSoftware/MieSlide/12)DBConnection/Biblioteca.db";
+			dbURL = "jdbc:sqlite:data/housecalendar.db";
 			username = "";
 			password = "";	
 	}
@@ -29,7 +29,6 @@ public class DBConnection {
 	
 		try 
 		{
-			dbURL=String.format(dbURL,schema); 
 			System.out.println(dbURL);
 			Class.forName(dbDriver);
 			
@@ -43,9 +42,12 @@ public class DBConnection {
 		return conn;
 	}
 
-	public static boolean isOpen(Connection conn)
-	{
-		return (conn == null)?false:true;
+	public static boolean isOpen(Connection conn) {
+		try {
+			return conn != null && !conn.isClosed();
+		} catch (SQLException e) {
+			return false;
+		}
 	}
 
 	public static Connection closeConnection(Connection conn)

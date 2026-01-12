@@ -35,6 +35,10 @@ public class Utente {
     public String getEmail() {
         return email;
     }
+
+    public String getPassword() {
+        return this.password;
+    }
     public Utente getUtente() {
         return this;
     }
@@ -71,4 +75,6 @@ public class Utente {
     public int hashCode() {
         return email.hashCode();
     }
+
+
 }

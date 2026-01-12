@@ -1,5 +1,7 @@
 package gestione;
 import dominio.Attivita;
+import dominio.TipoAttivita;
+import observer.Osservatore;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,28 +16,24 @@ public interface AttivitaGestione {
 
             // CRUD
         public void aggiungiAttivita( Map<String, Object> parametri);
-        public boolean verificaConflitti(Attivita a) ;
         public void modificaAttivita(int id, Map<String, Object> nuoviParametri);
         public void rimuoviAttivita(int id);
-        public Attivita getAttivitaById(int id);
+    
 
         // Filtri e ricerche
         public List<Attivita> cercaPerData(LocalDateTime data);
         public List<Attivita> cercaPerNome(String nome);
         public List<Attivita> cercaPerTipo(String tipo);
+        public Attivita cercaperid(int id) ;
+         public List<Attivita> cercaperpriorita(int p);
         public List<Attivita> filtra(Map<String, Object> criteri);
 
         // Controlli applicativi
-        public boolean verificaSovrapposizione(Attivita nuova);
-        public boolean esiste(int id);
-
-        // Observer
-        public void aggiungiObserver(Observer obs);
-        public void rimuoviObserver(Observer obs);
-        public void notificaObservers(String evento, Attivita attivita);
+        public boolean verificaConflitti(Attivita a) ;
+        public Attivita getAttivitaById(int id);  // a || null ;exception
 
         // Utilità
-        public List<Attivita> getTutte();
-        public void caricaDaDB(String path);
-        public void salvaSuDB(String path);
+        public List<Attivita> getTutteLeAttivita();
+        public void caricaDaDB();
+        TipoAttivita getTipoByString(String strTipo);
 }
