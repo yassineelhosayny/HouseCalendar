@@ -138,12 +138,15 @@ public class AttivitaGestioneImp implements AttivitaGestione {
     }
 
     @Override
-    public List<Attivita> cercaPerData(LocalDateTime datainizio) {
+    public List<Attivita> cercaPerData(LocalDateTime datainizio, LocalDateTime datafine) {
         List<Attivita> listaRes= new ArrayList<>();
-        if(datainizio == null){
-            throw new IllegalArgumentException("Errore: manca la data della recerca del Attivita.!");
-        }
-        listaRes = gestoreAttivita.cercaperdata(datainizio);
+    if (datainizio == null || datafine == null) {
+        throw new IllegalArgumentException("Errore: data/ora mancanti per la ricerca.");
+    }
+    if (datainizio.isAfter(datafine)) {
+        throw new IllegalArgumentException("Errore: l'inizio non può essere dopo la fine.");
+    }
+        listaRes = gestoreAttivita.cercaperdata(datainizio,datafine);
         return listaRes;
     }
 

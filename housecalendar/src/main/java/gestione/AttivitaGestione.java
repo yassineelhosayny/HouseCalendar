@@ -18,7 +18,7 @@ public interface AttivitaGestione {
     
 
         // Filtri e ricerche
-        public List<Attivita> cercaPerData(LocalDateTime data);
+        public List<Attivita> cercaPerData(LocalDateTime datainizio, LocalDateTime datafine);
         public List<Attivita> cercaPerNome(String nome);
         public List<Attivita> cercaPerTipo(String tipo);
         public Attivita cercaperid(int id) ;

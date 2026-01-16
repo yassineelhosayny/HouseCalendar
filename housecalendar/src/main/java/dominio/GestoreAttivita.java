@@ -9,71 +9,82 @@ import dataBase.DAO.AttivitaDAO;
 import observer.Osservatore;
 import observer.SoggettoOsservabile;
 import strategia.StrategiaOrdinamento;
+import strategia.StrategiaOrdinamentoPerData;
+import strategia.StrategiaOrdinamentoPerNome;
+import strategia.StrategiaOrdinamentoPerPriorita;
 
 //classe che gestisce attività e notifiche (da implementare Observer se necessario) da uno o più utenti
 //usa pattern singleton per garantire una sola istanza
 //tre pattern fino ad ora: singleton e observe efactory
-//=> contiene la lista attività!! o usiamo Db? + singleton + notify observer
+//=> contiene la lista attività!! tipo RAM accesso veloce? + singleton + notify observer
 public class GestoreAttivita implements SoggettoOsservabile {
 
-    private static GestoreAttivita instance = new GestoreAttivita();;     // Singleton
+    private static GestoreAttivita instance = new GestoreAttivita();     // Singleton
     private List<Osservatore> osservatori = new ArrayList<>();
     private List<Attivita> listaAttivita = new ArrayList<>();
-    //strategia corrente di ordinamento (Strategy Pattern)
+    //strategia corrente di ordinamento =->strategy Pattern
     private StrategiaOrdinamento strategiaOrdinamento;
-    //vuoto, non cè nessun attributo da inizializzare
+    //vuoto
     private GestoreAttivita() {
         // Costruttore privato per il pattern Singleton
     }
 
-    //crea istanza in caso non esiste (lo gia implementato <_>)
+    //crea istanza in caso non esiste
     public static GestoreAttivita getInstance() {
-        if (instance == null) {
-            instance = new GestoreAttivita();
-        }
         return instance;
     }
 
     public void aggiungiAttivita(Attivita a) {
                 //aggiungere la attività alla lista+ chiamare notificaOsservatori()
 
-            int id =  AttivitaDAO.aggiungiAttivita(a);  // aggiungere L'attivita alla data base " da implimentare dopo"
+            int id =  AttivitaDAO.aggiungiAttivita(a);  // aggiungere L'attivita alla data base 
+            if (id <= 0) {
+                throw new IllegalStateException("Errore inserimento nel DB");
+            }
             a.setId(id); //set del id generato dal database
             listaAttivita.add(a);
             notificaOsservatori();
             }
-            
-            public void rimuoviAttivita(Attivita a) {
-                if (a == null) {
+/* 
+    //add attivita ,ma solo per i test cosi no roviniamo la db
+public void aggiungiAttivitaPerTestNoDb(Attivita a) {
+
+            a.setId(); //set del id generato dal database
+            listaAttivita.add(a);
+            notificaOsservatori();
+            }
+*/
+
+    public void rimuoviAttivita(Attivita a) {
+            if (a == null) {
                 throw new IllegalArgumentException("Attività nulla");
             }
 
-            // 1. rimuovi dal DB
+            //prova a rimuovere dal DB(controlla connesione con db)
             boolean success = AttivitaDAO.rimuoviAttivitaById(a.getId());
             if (!success) {
-                throw new IllegalStateException("Errore nella rimozione dal database");
-            }
-
-            // 2. rimuovi dalla lista in RAM
+                    throw new IllegalStateException("Errore rimozione dal DB");
+                }
+            // rimuovi dalla lista
             listaAttivita.remove(a);
 
-            // 3. notifica observer
             notificaOsservatori();
     }
 
     public void modificaAttivita(int id, Attivita nuovaAttivita) {
         if (nuovaAttivita == null) 
             throw new IllegalArgumentException("Attività nulla");
-
+        
         Attivita esistente = getAttivitaById(id);
-        if (esistente == null)
-             throw new IllegalArgumentException("Attività non esistente");
-
+        if (esistente == null) {
+            throw new IllegalArgumentException("Attività non esistente (RAM)");
+        }
+        //prova ad aggiornare il DB, ma non bloccare tutto se fallisce (o gestisci l'errore)
         boolean success = AttivitaDAO.updateAttivita(nuovaAttivita);
         if (!success) 
-            throw new IllegalStateException("Errore aggiornamento database");
+            throw new IllegalStateException("Errore aggiornamento DB");
 
-        // sostituisci in RAM
+        // sostituisci nella listaAttivita
         for (int i = 0; i < listaAttivita.size(); i++) {
             if (listaAttivita.get(i).getId() == id) {
                 listaAttivita.set(i, nuovaAttivita);
@@ -86,66 +97,116 @@ public class GestoreAttivita implements SoggettoOsservabile {
 
 
     public List<Attivita> getTutteLeAttivita() {
-        return this.listaAttivita;
+        return new ArrayList<>(listaAttivita);
     }
 
     public Attivita getAttivitaById(int id) {
         //cercare attività per ID
+        for (Attivita a : listaAttivita) {
+            if (a.getId() == id) {
+                return a;
+            }
+        }
         return null;
     }
 
     public void setStrategiaOrdinamento(StrategiaOrdinamento strategia) {
         //memorizzare strategia scelta
+        this.strategiaOrdinamento = strategia;
     }
 
     public void ordinapernome() { 
         //ordinare lista con strategia scelta
+        StrategiaOrdinamento strategia = new StrategiaOrdinamentoPerNome();
+        setStrategiaOrdinamento(strategia);
+        strategiaOrdinamento.ordina(listaAttivita);
+        notificaOsservatori();
     }
 
     public void ordinaperdata() { 
           //ordinare lista con strategia scelta
+        StrategiaOrdinamento strategia = new StrategiaOrdinamentoPerData();
+        setStrategiaOrdinamento(strategia);
+        strategiaOrdinamento.ordina(listaAttivita);
+        notificaOsservatori();
     }
 
     public void ordinaperpriorita() { 
-                //ordinare lista con strategia scelta
-    }
-
-    public Attivita cercaperid(int id) { 
-        //da implementare
-        return null;
+            //ordinare lista con strategia scelta
+        StrategiaOrdinamento strategia = new StrategiaOrdinamentoPerPriorita();
+        setStrategiaOrdinamento(strategia);
+        strategiaOrdinamento.ordina(listaAttivita);
+        notificaOsservatori();
     }
 
     public List<Attivita> cercapernome(String nome) {
-        //da implementare
-        return null;
+        List<Attivita> risultati = new ArrayList<>();
+        for (Attivita a : listaAttivita) {
+            if (a.getDescrizione().toLowerCase().contains(nome.toLowerCase())) {
+                risultati.add(a);
+            }
+        }
+        return risultati;
      }
 
     public List<Attivita> cercapertipo(String tipo) { 
-        //da implementare
-        return null;
+        List<Attivita> risultati = new ArrayList<>();
+        for (Attivita a : listaAttivita) {
+           if (a.getTipo().name().equalsIgnoreCase(tipo)){
+                risultati.add(a);
+            }
+        }
+        return risultati;
     }
 
-    public List<Attivita> cercaperdata(LocalDateTime data) { 
-        //da implementare
-        return null;
+    public List<Attivita> cercaperdata(LocalDateTime inizio, LocalDateTime fine) { 
+    List<Attivita> risultati = new ArrayList<>();
+        if (inizio == null || fine == null)
+             return risultati;
+        if (inizio.isAfter(fine))
+             return risultati;
+
+    for (Attivita a : listaAttivita) {
+        if (a.getDataInizio() == null || a.getDataFine() == null) continue;
+
+        boolean islogical =
+                !a.getDataFine().isBefore(inizio) &&
+                !a.getDataInizio().isAfter(fine);
+
+        if (islogical) {
+            risultati.add(a);
+        }
+    }
+
+    return risultati;
     }
 
     public List<Attivita> cercaperpriorita(int p) {
-        //da implementare
-        return null;
+        List<Attivita> risultati = new ArrayList<>();
+        for (Attivita a : listaAttivita) {
+            if (a.getPriorita() == p) {
+                risultati.add(a);
+            }
+        }
+        return risultati;
      }
 
-    public void modificattivita(int id, Attivita nuova) {
-        //da implementare
-     }
-
-
+     //funzione stampa attivita per i test prima del implimentazione del gui
     public void stampatutteleattivita() {
-
+        if (listaAttivita.isEmpty()) {
+            System.out.println("Nessuna attività presente.");
+            return;
+        }
+        
+        System.out.println("=== LISTA ATTIVITÀ ===");
+        for (Attivita a : listaAttivita) {
+            System.out.println(a.toString());
+        }
+        System.out.println("======================");
      }
 
     public void caricaDaDB() {
-        //leggere dati da file+  notificaOsservatori()
+        //leggere dati da db+  notificaOsservatori()
         listaAttivita = AttivitaDAO.getAllAttivita();
         notificaOsservatori();
      
