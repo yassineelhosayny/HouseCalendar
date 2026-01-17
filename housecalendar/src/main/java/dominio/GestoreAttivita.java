@@ -44,16 +44,7 @@ public class GestoreAttivita implements SoggettoOsservabile {
             a.setId(id); //set del id generato dal database
             listaAttivita.add(a);
             notificaOsservatori();
-            }
-/* 
-    //add attivita ,ma solo per i test cosi no roviniamo la db
-public void aggiungiAttivitaPerTestNoDb(Attivita a) {
-
-            a.setId(); //set del id generato dal database
-            listaAttivita.add(a);
-            notificaOsservatori();
-            }
-*/
+        }
 
     public void rimuoviAttivita(Attivita a) {
             if (a == null) {
@@ -191,20 +182,6 @@ public void aggiungiAttivitaPerTestNoDb(Attivita a) {
         return risultati;
      }
 
-     //funzione stampa attivita per i test prima del implimentazione del gui
-    public void stampatutteleattivita() {
-        if (listaAttivita.isEmpty()) {
-            System.out.println("Nessuna attività presente.");
-            return;
-        }
-        
-        System.out.println("=== LISTA ATTIVITÀ ===");
-        for (Attivita a : listaAttivita) {
-            System.out.println(a.toString());
-        }
-        System.out.println("======================");
-     }
-
     public void caricaDaDB() {
         //leggere dati da db+  notificaOsservatori()
         listaAttivita = AttivitaDAO.getAllAttivita();
@@ -233,5 +210,19 @@ public void aggiungiAttivitaPerTestNoDb(Attivita a) {
     }
     }
 
+
+         //funzione stampa attivita per i test prima del implimentazione del gui
+    public void stampatutteleattivita() {
+        if (listaAttivita.isEmpty()) {
+            System.out.println("Nessuna attività presente.");
+            return;
+        }
+        
+        System.out.println("=== LISTA ATTIVITÀ ===");
+        for (Attivita a : listaAttivita) {
+            System.out.println(a.toString());
+        }
+        System.out.println("======================");
+     }
 
 }

@@ -23,14 +23,15 @@ public class AttivitaDAO {
     // metodo aggiungiAttivita(attivita);
     public static int aggiungiAttivita(Attivita a) {
         Connection conn = null;
-
         String sql = "INSERT INTO attivita " +
                 "(descrizione, tipo, data_inizio, data_fine, data_notifica, priorita, attivita_privata, context, utente_email) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             conn = DBConnection.startConnection(null, "");
-
+            if (conn == null) {
+                  throw new IllegalStateException("Connessione DB non disponibile (driver SQLite mancante?)");
+             }
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             ps.setString(1, a.getDescrizione());
@@ -52,7 +53,8 @@ public class AttivitaDAO {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("ERRORE INSERT attivita00000000000000000000000000000: " + e.getMessage());
+            e.printStackTrace();        
         } finally {
             DBConnection.closeConnection(conn);
         }

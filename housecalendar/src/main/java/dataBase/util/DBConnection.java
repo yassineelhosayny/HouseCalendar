@@ -33,6 +33,7 @@ public class DBConnection {
 			Class.forName(dbDriver);
 			
 			conn = DriverManager.getConnection(dbURL, username, password);// Apertura connessione
+			conn.createStatement().execute("PRAGMA foreign_keys = ON");
 		}
 		catch (Exception e) 
 		{

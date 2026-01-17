@@ -12,27 +12,34 @@ import dominio.Utente;
 public class UtenteDAO {
 
     // INSERT: true se inserito, false se errore (o già esiste)
-    public static boolean aggiungiUtente(Utente u) {
-        Connection conn = null;
+   public static boolean aggiungiUtente(Utente u) {
+    Connection conn = null;
 
-        String sql = "INSERT INTO utente (nome, email, password) VALUES (?, ?, ?)";
-        try {
-            conn = DBConnection.startConnection(null, "");
+    //se l'email esiste già, ignore enon fa nulla e non lancia errori
+    String sql = "INSERT OR IGNORE INTO utente (nome, email, password) VALUES (?, ?, ?)";
 
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, u.getNome());
-            ps.setString(2, u.getEmail());
-            ps.setString(3, u.getPassword());
-
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            DBConnection.closeConnection(conn);
+    try {
+        conn = DBConnection.startConnection(null, "");
+        if (conn == null) {
+            throw new IllegalStateException("Connessione DB non disponibile (driver SQLite mancante?)");
         }
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, u.getNome());
+        ps.setString(2, u.getEmail());
+        ps.setString(3, u.getPassword());
+
+        int rows = ps.executeUpdate();
+
+        // rows = 1 se inserito, rows = 0 se già esiste
+        return rows == 1;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    } finally {
+        DBConnection.closeConnection(conn);
     }
+}
 
     // SELECT by email: ritorna Utente o null se non trovato
     public static Utente getUtenteByEmail(String email) {

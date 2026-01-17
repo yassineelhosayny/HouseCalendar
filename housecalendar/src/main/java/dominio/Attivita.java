@@ -173,7 +173,7 @@ public abstract class Attivita {
         LocalDateTime nuovaInizia = nuova.getDataInizio();
         LocalDateTime nuovaFine = nuova.getDataFine();
 
-        return !salvataInizia.isAfter(nuovaFine)&& !salvataFine.isBefore(nuovaInizia);
+            return salvataInizia.isBefore(nuovaFine) && salvataFine.isAfter(nuovaInizia);
     }
 
     public boolean isScaduta() {

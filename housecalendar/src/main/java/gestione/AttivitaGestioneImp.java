@@ -19,7 +19,6 @@ public class AttivitaGestioneImp implements AttivitaGestione {
 
     @Override
     public void aggiungiAttivita( Map<String, Object> parametri) {
-       
         String descrizione = (String)parametri.get("descrizione");
         TipoAttivita tipo = (TipoAttivita) parametri.get("tipo");
         LocalDateTime dataInizio =(LocalDateTime) parametri.get("dataInizio");
@@ -31,11 +30,17 @@ public class AttivitaGestioneImp implements AttivitaGestione {
         String context = (String) parametri.get("context");
         
         //controlli
-        if (descrizione == null || tipo == null || dataInizio == null || dataFine == null ||
-        dataNotifica == null || priorita == null || utenteAssegnato == null || attivitaPrivata == null) 
-           {
-        throw new IllegalArgumentException("Parametri mancanti o null.");
+        if (descrizione == null || tipo == null || dataInizio == null || dataFine == null || priorita == null || utenteAssegnato == null || attivitaPrivata == null) {
+             throw new IllegalArgumentException("Parametri mancanti o null.");
            }
+        if (dataNotifica == null) {
+                LocalDateTime proposta = dataInizio.minusMinutes(10); //se utente no ha specificato la dataNotifica, recevi una notifica 10 min prima del evento se non è già passato
+                if (proposta.isBefore(LocalDateTime.now())) {
+                    dataNotifica = dataInizio;   // oppure LocalDateTime.now()
+                } else {
+                    dataNotifica = proposta;
+                }
+        }
         if (dataNotifica.isAfter(dataInizio) || dataNotifica.isBefore(LocalDateTime.now())) {
                  throw new IllegalArgumentException("La data di notifica non può essere nel passato o successiva alla data dell'evento.");
             }
@@ -43,6 +48,7 @@ public class AttivitaGestioneImp implements AttivitaGestione {
         if(dataInizio.isAfter(dataFine)){
             throw new IllegalArgumentException("La data di Inizio no pò essere successiva alla data Fine del evento.");
         }
+
 
         Attivita a = AttivitaFactory.crea(descrizione,tipo, dataInizio,dataFine, dataNotifica, (int)priorita, utenteAssegnato, (boolean) attivitaPrivata,context);
         if(verificaConflitti(a)){
