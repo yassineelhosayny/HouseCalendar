@@ -65,7 +65,7 @@ private Attivita creaAttivitaConFactory(String descrizione, TipoAttivita tipo,
             descrizione, tipo,
             inizio, fine, notifica,
             priorita, utenteTest, privata,
-            context
+            context,false
     );
 }
 

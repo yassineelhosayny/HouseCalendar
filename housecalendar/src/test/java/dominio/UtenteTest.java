@@ -30,7 +30,7 @@ public class UtenteTest {
 		u2= new Utente("marco","marco@gmail.com","87654321");
 
 		new AttivitaFactory();
-		a1= AttivitaFactory.crea("Compra Latte",TipoAttivita.SPESA,LocalDateTime.parse("2026-04-12T08:00") , LocalDateTime.parse("2026-04-12T10:00"), LocalDateTime.parse("2026-04-06T08:00"), 2, u1, false,"familia");
+		a1= AttivitaFactory.crea("Compra Latte",TipoAttivita.SPESA,LocalDateTime.parse("2026-04-12T08:00") , LocalDateTime.parse("2026-04-12T10:00"), LocalDateTime.parse("2026-04-06T08:00"), 2, u1, false,"familia",false);
 	}
 	@AfterEach
 	public void tearDown() {

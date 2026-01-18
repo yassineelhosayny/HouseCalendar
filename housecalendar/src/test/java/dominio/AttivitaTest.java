@@ -25,7 +25,7 @@ class AttivitaTest {
 				Utente utenteAssegnato, 
 				boolean attivitaPrivata
 		) {
-			super(descrizione, tipo, dataInizio,dataFine, dataNotifica, priorita, utenteAssegnato, attivitaPrivata);
+			super(descrizione, tipo, dataInizio,dataFine, dataNotifica, priorita, utenteAssegnato, attivitaPrivata,false);
 			
 		}
 	    

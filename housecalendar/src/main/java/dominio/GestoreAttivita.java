@@ -36,7 +36,8 @@ public class GestoreAttivita implements SoggettoOsservabile {
 
     public void aggiungiAttivita(Attivita a) {
                 //aggiungere la attività alla lista+ chiamare notificaOsservatori()
-
+            if (a == null) throw new IllegalArgumentException("Attività nulla");
+            a.setNotificata(false); 
             int id =  AttivitaDAO.aggiungiAttivita(a);  // aggiungere L'attivita alla data base 
             if (id <= 0) {
                 throw new IllegalStateException("Errore inserimento nel DB");
@@ -70,6 +71,7 @@ public class GestoreAttivita implements SoggettoOsservabile {
         if (esistente == null) {
             throw new IllegalArgumentException("Attività non esistente (RAM)");
         }
+        nuovaAttivita.setId(id);
         //prova ad aggiornare il DB, ma non bloccare tutto se fallisce (o gestisci l'errore)
         boolean success = AttivitaDAO.updateAttivita(nuovaAttivita);
         if (!success) 
@@ -184,11 +186,11 @@ public class GestoreAttivita implements SoggettoOsservabile {
 
     public void caricaDaDB() {
         //leggere dati da db+  notificaOsservatori()
-        listaAttivita = AttivitaDAO.getAllAttivita();
+        List<Attivita> dalDb = AttivitaDAO.getAllAttivita();
+        this.listaAttivita = (dalDb != null) ? dalDb : new ArrayList<>(); // sicurezza
         notificaOsservatori();
      
     }
-
     //metodi a implementatire per gestire attività e notifiche 
     @Override
     public void aggiungiOsservatore(Osservatore o) {

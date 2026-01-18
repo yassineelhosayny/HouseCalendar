@@ -8,8 +8,9 @@ public class AttivitaSpesa extends Attivita {
 	private String negozio;
 	
     public AttivitaSpesa(String descrizione,LocalDateTime dataInizio, LocalDateTime dataFine, LocalDateTime dataNotifica,
-            int priorita, Utente utenteAssegnato, boolean attivitaPrivata, String negozio) {
-        super(descrizione, TipoAttivita.SPESA, dataInizio,dataFine, dataNotifica, priorita, utenteAssegnato, attivitaPrivata);
+            int priorita, Utente utenteAssegnato, boolean attivitaPrivata, String negozio,boolean notificata ) {
+                
+        super(descrizione, TipoAttivita.SPESA, dataInizio,dataFine, dataNotifica, priorita, utenteAssegnato, attivitaPrivata,notificata );
         
         
         this.negozio = negozio;

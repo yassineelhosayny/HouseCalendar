@@ -11,12 +11,13 @@ public class AttivitaPojo {
     private boolean attivitaPrivata;
     private String context;          
     private String utenteEmail;      // FK per identificare utnete
+    private boolean notificata;
 
     // costruttore vuoto (OBBLIGATORIO per JDBC)
     public AttivitaPojo() {}
 
     // costruttore completo (opzionale ma comodo)
-    public AttivitaPojo(String descrizione, String tipo,LocalDateTime dataInizio, LocalDateTime dataFine,LocalDateTime dataNotifica, int priorita,boolean attivitaPrivata, String context,String utenteEmail){
+    public AttivitaPojo(String descrizione, String tipo,LocalDateTime dataInizio, LocalDateTime dataFine,LocalDateTime dataNotifica, int priorita,boolean attivitaPrivata, String context,String utenteEmail,boolean notificata){
         this.descrizione = descrizione;
         this.tipo = tipo;
         this.dataInizio = dataInizio;
@@ -26,6 +27,7 @@ public class AttivitaPojo {
         this.attivitaPrivata = attivitaPrivata;
         this.context = context;
         this.utenteEmail = utenteEmail;
+        this.notificata = notificata;
     }
 
     //getter e setter
@@ -108,4 +110,12 @@ public class AttivitaPojo {
     public void setUtenteEmail(String utenteEmail) {
         this.utenteEmail = utenteEmail;
     }
+    public boolean isNotificata() {  
+    return notificata;
+    }
+
+    public void setNotificata(boolean notificata) { 
+        this.notificata = notificata;
+    }
+
 }

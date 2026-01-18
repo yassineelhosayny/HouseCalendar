@@ -28,7 +28,8 @@ public class AttivitaGestioneImp implements AttivitaGestione {
         Utente utenteAssegnato = (Utente) parametri.get("utenteAssegnato");
         Boolean attivitaPrivata =(Boolean) parametri.get("attivitaPrivata");
         String context = (String) parametri.get("context");
-        
+        boolean notificata = false; 
+
         //controlli
         if (descrizione == null || tipo == null || dataInizio == null || dataFine == null || priorita == null || utenteAssegnato == null || attivitaPrivata == null) {
              throw new IllegalArgumentException("Parametri mancanti o null.");
@@ -49,8 +50,8 @@ public class AttivitaGestioneImp implements AttivitaGestione {
             throw new IllegalArgumentException("La data di Inizio no pò essere successiva alla data Fine del evento.");
         }
 
-
-        Attivita a = AttivitaFactory.crea(descrizione,tipo, dataInizio,dataFine, dataNotifica, (int)priorita, utenteAssegnato, (boolean) attivitaPrivata,context);
+         
+        Attivita a = AttivitaFactory.crea(descrizione,tipo, dataInizio,dataFine, dataNotifica, (int)priorita, utenteAssegnato, (boolean) attivitaPrivata,context,notificata);
         if(verificaConflitti(a)){
             throw new IllegalArgumentException("tempo occupatoooo");
         }
@@ -93,14 +94,21 @@ public class AttivitaGestioneImp implements AttivitaGestione {
         String context = (String) nuoviParametri.get("context");
 
         // controlli
-        if (descrizione == null || tipo == null || dataInizio == null || dataFine == null ||
-            dataNotifica == null || priorita == null || utenteAssegnato == null || attivitaPrivata == null) {
+        if (descrizione == null || tipo == null || dataInizio == null || dataFine == null || priorita == null || utenteAssegnato == null || attivitaPrivata == null) {
             throw new IllegalArgumentException("Errore: Parametri mancanti o null.");
         }
         if (dataInizio.isAfter(dataFine)) {
             throw new IllegalArgumentException("Errore: data inizio dopo data fine");
         }
-        if (dataNotifica.isBefore(LocalDateTime.now()) || dataNotifica.isAfter(dataInizio)) {
+        if (dataNotifica == null) { 
+            LocalDateTime proposta = dataInizio.minusMinutes(10);
+            if (proposta.isBefore(LocalDateTime.now())) {
+                dataNotifica = dataInizio;
+            } else {
+                dataNotifica = proposta;
+            }
+        }
+        if (dataNotifica.isBefore(LocalDateTime.now()) || dataNotifica.isAfter(dataInizio)) { //////////////**//// come prima ma ora dopo aver calcolato default
             throw new IllegalArgumentException("Errore: data notifica non valida");
         }
 
@@ -109,9 +117,9 @@ public class AttivitaGestioneImp implements AttivitaGestione {
         if (vecchia == null) {
             throw new IllegalArgumentException("Errore: Attività non esiste");
         }
-
+         boolean notificata = false;
         // CREA una nuova attività completa "incluso context
-        Attivita nuova = AttivitaFactory.crea(descrizione, tipo, dataInizio, dataFine, dataNotifica,priorita, utenteAssegnato, attivitaPrivata, context);
+        Attivita nuova = AttivitaFactory.crea(descrizione, tipo, dataInizio, dataFine, dataNotifica,priorita, utenteAssegnato, attivitaPrivata, context,notificata);
 
         nuova.setId(id);
 

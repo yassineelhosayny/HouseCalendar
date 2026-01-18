@@ -9,11 +9,11 @@ public class AttivitaStudio extends Attivita{
 	private String materia;
 	
     public AttivitaStudio(String descrizione,LocalDateTime dataInizio, LocalDateTime dataFine, LocalDateTime dataNotifica,
-            int priorita, Utente utenteAssegnato, boolean attivitaPrivata, String materia) {
+            int priorita, Utente utenteAssegnato, boolean attivitaPrivata, String materia,boolean notificata ) {
                 //super chiama il costruttore madre
     	
     	
-        super(descrizione, TipoAttivita.STUDIO, dataInizio,dataFine, dataNotifica, priorita, utenteAssegnato, attivitaPrivata);
+        super(descrizione, TipoAttivita.STUDIO, dataInizio,dataFine, dataNotifica, priorita, utenteAssegnato, attivitaPrivata, notificata );
         
         this.materia = materia;
     }

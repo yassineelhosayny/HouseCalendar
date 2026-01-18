@@ -15,9 +15,10 @@ public class AttivitaDomestica extends Attivita{
             int priorita, 
             Utente utenteAssegnato, 
             boolean attivitaPrivata,
-            String stanzaCasa) {
+            String stanzaCasa,
+            boolean notificata ) {
     	
-        super(descrizione, TipoAttivita.DOMESTICA, dataInizio,dataFine, dataNotifica, priorita, utenteAssegnato, attivitaPrivata);
+        super(descrizione, TipoAttivita.DOMESTICA, dataInizio,dataFine, dataNotifica, priorita, utenteAssegnato, attivitaPrivata, notificata );
         this.stanzaCasa = stanzaCasa; 		//cucina, camera da letto, salotto, bagno, ecc...
     }
     //attributi specifici per AttivitaDomestica (se necessari)

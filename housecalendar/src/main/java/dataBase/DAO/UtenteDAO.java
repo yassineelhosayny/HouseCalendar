@@ -13,6 +13,8 @@ public class UtenteDAO {
 
     // INSERT: true se inserito, false se errore (o già esiste)
    public static boolean aggiungiUtente(Utente u) {
+    if (u == null) throw new IllegalArgumentException("Utente nullo"); 
+
     Connection conn = null;
 
     //se l'email esiste già, ignore enon fa nulla e non lancia errori
@@ -43,6 +45,8 @@ public class UtenteDAO {
 
     // SELECT by email: ritorna Utente o null se non trovato
     public static Utente getUtenteByEmail(String email) {
+        if (email == null || email.isBlank()) return null; 
+
         Connection conn = null;
 
         String sql = "SELECT nome, email, password FROM utente WHERE email = ?";
@@ -74,6 +78,8 @@ public class UtenteDAO {
 
     // UPDATE: true se aggiornato
     public static boolean updateUtente(Utente u) {
+        if (u == null) throw new IllegalArgumentException("Utente nullo"); 
+
         Connection conn = null;
 
         String sql = "UPDATE utente SET nome = ?, password = ? WHERE email = ?";
@@ -98,6 +104,8 @@ public class UtenteDAO {
 
     // DELETE: true se cancellato
     public static boolean rimuoviUtenteByEmail(String email) {
+        if (email == null || email.isBlank()) return false; 
+
         Connection conn = null;
 
         String sql = "DELETE FROM utente WHERE email = ?";
@@ -148,8 +156,9 @@ public class UtenteDAO {
 
     // Login semplice: true se email e password combaciano
     public static boolean checkLogin(String email, String password) {
-        Connection conn = null;
+        if (email == null || password == null) return false; 
 
+        Connection conn = null;
         String sql = "SELECT 1 FROM utente WHERE email = ? AND password = ?";
         try {
             conn = DBConnection.startConnection(null, "");

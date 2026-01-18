@@ -17,10 +17,10 @@ public abstract class Attivita {
     protected boolean completato;
     protected Utente utenteAssegnato;
     protected boolean attivitaPrivata; //visibile solo all'utente assegnato
-    
+    private boolean notificata; //notificato o noo , default : false 
 
     //costrutorre generale per Attivita
-    public Attivita(String descrizione, TipoAttivita tipo, LocalDateTime dataInizio, LocalDateTime dataFine, LocalDateTime dataNotifica, int priorita, Utente utenteAssegnato, boolean attivitaPrivata) {
+    public Attivita(String descrizione, TipoAttivita tipo, LocalDateTime dataInizio, LocalDateTime dataFine, LocalDateTime dataNotifica, int priorita, Utente utenteAssegnato, boolean attivitaPrivata, boolean notificata) {
     	
         
         if(priorita < 1 || priorita > 3){
@@ -54,6 +54,7 @@ public abstract class Attivita {
         this.completato = false; //inizialmente non completato
         this.utenteAssegnato = utenteAssegnato;
         this.attivitaPrivata = attivitaPrivata;
+        this.notificata = false;
     }
 
 
@@ -94,7 +95,9 @@ public abstract class Attivita {
     public boolean isAttivitaPrivata() {
         return this.attivitaPrivata;
     } 
-    
+     public boolean isNotificata() { 
+        return this.notificata;
+    }
     
     public LocalDateTime getDataNotifica() {
         return this.dataNotifica;
@@ -139,6 +142,10 @@ public abstract class Attivita {
             throw new IllegalArgumentException("La data di notifica deve essere valida e non dopo la data dell' evento.");
         }
         this.dataNotifica = dataNotifica;
+    }
+
+    public void setNotificata(boolean notificata) { 
+        this.notificata = notificata;
     }
 
     public void setPriorita(int priorita) {
