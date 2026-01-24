@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane styleClass="root" stylesheets="@../style/app.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+    
+    <!-- Header -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" styleClass="header">
+            <padding>
+                <Insets bottom="15" left="20" right="20" top="15" />
+            </padding>
+            
+            <!-- Logo e Titolo -->
+            <HBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
+                <Label styleClass="logo-icon" text="🏠" />
+                <Label styleClass="app-title" text="HouseCalendar" />
+            </HBox>
+            
+            <!-- User Info -->
+            <HBox alignment="CENTER_RIGHT" spacing="15">
+                <Button styleClass="notification-btn" text="🔔">
+                    <graphic>
+                        <StackPane>
+                            <Label styleClass="notification-badge" text="1" />
+                        </StackPane>
+                    </graphic>
+                </Button>
+                <MenuButton styleClass="user-menu" text="Mario ▼" />
+                <Button styleClass="menu-btn" text="⋮" />
+            </HBox>
+        </HBox>
+    </top>
+    
+    <!-- Sidebar Sinistra -->
+    <left>
+        <VBox prefWidth="240" spacing="0" styleClass="sidebar">
+            <padding>
+                <Insets bottom="20" left="0" right="0" top="20" />
+            </padding>
+            
+            <!-- Titolo Filtri -->
+            <HBox alignment="CENTER_LEFT" styleClass="sidebar-header">
+                <padding>
+                    <Insets bottom="10" left="20" right="20" top="10" />
+                </padding>
+                <Label styleClass="sidebar-title" text="☰ Filtri" />
+            </HBox>
+            
+            <!-- Toggle Buttons Filtri -->
+            <VBox spacing="5" styleClass="filter-group">
+                <padding>
+                    <Insets bottom="10" left="10" right="10" top="10" />
+                </padding>
+                <ToggleButton fx:id="filtroTutte" prefWidth="220" selected="true" styleClass="filter-btn, filter-btn-active" text="○ Tutte" />
+                <ToggleButton fx:id="filtroPersonali" prefWidth="220" styleClass="filter-btn" text="👤 Personali" />
+                <ToggleButton fx:id="filtroCondivise" prefWidth="220" styleClass="filter-btn" text="✓ Condivise" />
+            </VBox>
+            
+            <!-- Calendario -->
+            <VBox styleClass="calendar-container" VBox.vgrow="ALWAYS">
+                <padding>
+                    <Insets bottom="20" left="15" right="15" top="30" />
+                </padding>
+                
+                <!-- Intestazione Calendario -->
+                <HBox alignment="CENTER" styleClass="calendar-header">
+                    <Button styleClass="calendar-nav-btn" text="‹" />
+                    <Label styleClass="calendar-month" text="Aprile 2024" HBox.hgrow="ALWAYS" />
+                    <Button styleClass="calendar-nav-btn" text="›" />
+                </HBox>
+                
+                <!-- Griglia Calendario -->
+                <GridPane hgap="2" styleClass="calendar-grid" vgap="2">
+                    <padding>
+                        <Insets top="10" />
+                    </padding>
+                    
+                    <!-- Giorni della settimana -->
+                    <Label styleClass="calendar-day-header" text="D" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <Label styleClass="calendar-day-header" text="L" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <Label styleClass="calendar-day-header" text="M" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                    <Label styleClass="calendar-day-header" text="G" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                    <Label styleClass="calendar-day-header" text="V" GridPane.columnIndex="4" GridPane.rowIndex="0" />
+                    <Label styleClass="calendar-day-header" text="S" GridPane.columnIndex="5" GridPane.rowIndex="0" />
+                    
+                    <!-- Giorni del mese (esempio) -->
+                    <Label styleClass="calendar-day" text="1" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <Label styleClass="calendar-day" text="2" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <Label styleClass="calendar-day" text="3" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                    <Label styleClass="calendar-day, calendar-day-selected" text="24" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+               <columnConstraints>
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+               </rowConstraints>
+                </GridPane>
+            </VBox>
+        </VBox>
+    </left>
+    
+    <!-- Area Principale -->
+    <center>
+    <VBox styleClass="main-content" spacing="20" fillWidth="true"
+          prefHeight="600" minHeight="400">
+        <padding>
+            <Insets top="30" right="30" bottom="30" left="30"/>
+        </padding>
+        
+        <!-- Titolo e ricerca -->
+        <HBox alignment="CENTER_LEFT" spacing="20" prefHeight="50">
+            <Label styleClass="page-title" text="Gestione Attività" />
+            <Region HBox.hgrow="ALWAYS" />
+            <HBox styleClass="search-container" alignment="CENTER_LEFT" spacing="10">
+                <Label styleClass="search-icon" text="🔍"/>
+                <TextField fx:id="searchField" styleClass="search-field" 
+                          promptText="Cerca..." prefWidth="200"/>
+            </HBox>
+        </HBox>
+        
+        <!-- Area attività con altezza fissa -->
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" 
+                   prefHeight="400" minHeight="300"
+                   styleClass="custom-scroll">
+            <content>
+                <VBox fx:id="activityListContainer" spacing="10" 
+                      style="-fx-padding: 10; -fx-min-height: 300;">
+                    <!-- Esempio riga -->
+                    <HBox fx:id="rowExample" spacing="15" alignment="CENTER_LEFT" 
+                          minHeight="70" prefHeight="70"
+                          style="-fx-background-color: white; -fx-background-radius: 10; 
+                                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+                        <padding>
+                            <Insets left="20" right="20" />
+                        </padding>
+                        
+                        <VBox prefWidth="250" minWidth="250" alignment="CENTER_LEFT">
+                            <Label text="Studio per esame" 
+                                   styleClass="activity-title" 
+                                   style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                        </VBox>
+                        
+                        <HBox prefWidth="150" minWidth="150" alignment="CENTER_LEFT">
+                            <Label text="Personale" styleClass="badge-personale"/>
+                        </HBox>
+                        
+                        <VBox prefWidth="120" minWidth="120" alignment="CENTER_LEFT">
+                            <Label text="30/04/2024" styleClass="activity-date"/>
+                        </VBox>
+                        
+                        <VBox prefWidth="80" minWidth="80" alignment="CENTER_LEFT">
+                            <Label text="15:00" styleClass="activity-time"/>
+                        </VBox>
+
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <Button styleClass="btn-action, btn-edit" text="✏"/>
+                            <Button styleClass="btn-action, btn-delete" text="🗑"/>
+                        </HBox>
+                    </HBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+        
+        <!-- Pulsante aggiungi -->
+        <HBox alignment="CENTER_RIGHT" prefHeight="50">
+            <Button fx:id="btnAggiungi" styleClass="btn-primary" 
+                    text="+ Aggiungi Attività"/>
+        </HBox>
+    </VBox>
+</center>
+</BorderPane>

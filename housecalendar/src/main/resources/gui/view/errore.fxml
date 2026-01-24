@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      styleClass="dialog-container"
+      stylesheets="@../style/app.css"
+      spacing="20"
+      alignment="CENTER"
+      prefWidth="400"
+      prefHeight="250">
+    
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+    
+    <!-- Icona Errore -->
+    <StackPane styleClass="error-icon-container">
+        <Label styleClass="error-icon" text="⚠"/>
+    </StackPane>
+    
+    <!-- Titolo -->
+    <Label fx:id="errorTitle" styleClass="error-title" text="Errore" textAlignment="CENTER" wrapText="true"/>
+    
+    <!-- Messaggio -->
+    <Label fx:id="errorMessage" styleClass="error-message" 
+           text="Si è verificato un errore durante l'operazione." 
+           textAlignment="CENTER" wrapText="true" prefHeight="60"/>
+    
+    <!-- Pulsante Chiudi -->
+    <HBox alignment="CENTER" spacing="10">
+        <Button fx:id="btnChiudi" styleClass="btn-primary" text="OK" prefWidth="120"/>
+    </HBox>
+</VBox>
