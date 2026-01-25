@@ -12,6 +12,8 @@ import dominio.AttivitaFactory;
 import dominio.GestoreAttivita;
 import dominio.TipoAttivita;
 import dominio.Utente;
+import dataBase.DAO.AttivitaDAO;
+import dataBase.DAO.UtenteDAO;
 
 
 public class AttivitaGestioneImp implements AttivitaGestione {
@@ -107,6 +109,9 @@ public class AttivitaGestioneImp implements AttivitaGestione {
             } else {
                 dataNotifica = proposta;
             }
+        }
+        if (dataInizio.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Errore: l'attività non può essere nel passato.");
         }
         if (dataNotifica.isBefore(LocalDateTime.now()) || dataNotifica.isAfter(dataInizio)) { //////////////**//// come prima ma ora dopo aver calcolato default
             throw new IllegalArgumentException("Errore: data notifica non valida");
@@ -252,4 +257,49 @@ public class AttivitaGestioneImp implements AttivitaGestione {
         gestoreAttivita.caricaDaDB();
     }
     
+    public List<Attivita> getAttivitaDaNotificare(LocalDateTime momento) {
+        if (momento == null) {
+            throw new IllegalArgumentException("Errore: momento di notifica mancante.");
+        }
+        return AttivitaDAO.getAttivitaDaNotificare(momento);
+    }
+
+    public void segnaNotificata(int idAttivita, boolean value) {
+        if (idAttivita <= 0) {
+            throw new IllegalArgumentException("Errore: id attività non valido.");
+        }
+        boolean aggiornata = AttivitaDAO.setNotificata(idAttivita, value);
+        if (aggiornata) {
+            Attivita inMemoria = gestoreAttivita.getAttivitaById(idAttivita);
+            if (inMemoria != null) {
+                inMemoria.setNotificata(value);
+            }
+        }
+    }
+
+    @Override
+    public void segnaCompletata(int idAttivita, boolean value) {
+        if (idAttivita <= 0) {
+            throw new IllegalArgumentException("Errore: id attività non valido.");
+        }
+        boolean aggiornata = AttivitaDAO.setCompletata(idAttivita, value);
+        if (aggiornata) {
+            Attivita inMemoria = gestoreAttivita.getAttivitaById(idAttivita);
+            if (inMemoria != null) {
+                inMemoria.setCompletato(value);
+            }
+        }
+    }
+//l'ho uso prima del implimentazione del authenticazione
+    public List<Utente> getUtentiDisponibili() {
+        List<Utente> utenti = UtenteDAO.getAllUtenti();
+        if (utenti.isEmpty()) {
+            Utente predefinito = new Utente("Yassine El hosayny", "yassine.elhosayny@housecalendar.it", "password_no_hash");
+            UtenteDAO.aggiungiUtente(predefinito);
+            utenti = UtenteDAO.getAllUtenti();
+        }
+        return utenti;
+    }
+
 }
+

@@ -1,4 +1,4 @@
-package dominio;
+﻿package dominio;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,7 @@ public class Utente {
     //costruttore
     public Utente(String nome, String email, String password) {
         if(nome == null || nome.isEmpty()){
-            throw new IllegalArgumentException("Il nome non può essere vuoto.");
+            throw new IllegalArgumentException("Il nome non puo essere vuoto.");
         }
         if(email == null || email.isEmpty() || !email.contains("@")){
             throw new IllegalArgumentException("Email non valida.");
@@ -28,6 +28,18 @@ public class Utente {
     }
     
 
+    public Utente(String nome, String email) {
+        if(nome == null || nome.isEmpty()){
+            throw new IllegalArgumentException("Il nome non puo essere vuoto.");
+        }
+        if(email == null || email.isEmpty() || !email.contains("@")){
+            throw new IllegalArgumentException("Email non valida.");
+        }
+        this.nome = nome;
+        this.email = email;
+        this.password = "";
+        this.attivitaAssegnate = new ArrayList<>();
+    }
     //metodi per gestire l'utente
     public String getNome() {
         return nome;
@@ -51,16 +63,16 @@ public class Utente {
     }
     public void aggiungiAttivita(Attivita a){
         if(a == null){
-            throw new IllegalArgumentException("L'attività non può essere nulla.");
+            throw new IllegalArgumentException("L'attivita non puo essere nulla.");
         }
         if(attivitaAssegnate.contains(a)){
-            throw new IllegalArgumentException("L'attività è già assegnata a questo utente.");
+            throw new IllegalArgumentException("L'attivita e gia assegnata a questo utente.");
         }
         attivitaAssegnate.add(a);
     }
     public boolean rimuoviAttivita(Attivita a){
         if(a == null || !attivitaAssegnate.contains(a)){
-            throw new IllegalArgumentException("L'attività non è assegnata a questo utente.");
+            throw new IllegalArgumentException("L'attivita non e assegnata a questo utente.");
         }
         return attivitaAssegnate.remove(a);
     }
@@ -78,3 +90,5 @@ public class Utente {
 
 
 }
+
+

@@ -22,14 +22,11 @@ public class DBConnection {
 	public static Connection startConnection(Connection conn, String schema)
 	{
 		init();
-		System.out.println(dbURL);
-
 		if ( isOpen(conn) )
 			closeConnection(conn);
 	
 		try 
 		{
-			System.out.println(dbURL);
 			Class.forName(dbDriver);
 			
 			conn = DriverManager.getConnection(dbURL, username, password);// Apertura connessione

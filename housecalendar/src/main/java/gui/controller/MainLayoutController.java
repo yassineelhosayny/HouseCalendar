@@ -1,137 +1,674 @@
 package gui.controller;
 
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
 import dominio.Attivita;
+import dominio.AttivitaDomestica;
+import dominio.AttivitaSpesa;
+import dominio.AttivitaStudio;
+import dominio.Utente;
+
 import gestione.AttivitaGestioneImp;
+import gestione.SessioneUtente;
+
+import gui.servizi.DialogoAttivita;
+import gui.servizi.NotificaToast;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.RowConstraints;
+import javafx.fxml.FXMLLoader;
+
+import javafx.geometry.Insets;
+
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ToggleButton;
+import javafx.geometry.Side;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
 
+import javafx.scene.control.OverrunStyle;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.util.Duration;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import java.time.LocalTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+
+import java.util.List;
+import java.util.Optional;
 
 public class MainLayoutController {
 
-    @FXML private VBox contenitoreSchede;      // deve combaciare con fx:id="contenitoreSchede"
-    @FXML private TextField campoRicerca;      // deve combaciare con fx:id="campoRicerca"
-    @FXML private Label etichettaMese;         // deve combaciare con fx:id="etichettaMese"
-    @FXML private GridPane grigliaCalendario;  // deve combaciare con fx:id="grigliaCalendario"
-    @FXML private ToggleGroup gruppoFiltri;    // deve combaciare con fx:id="gruppoFiltri"
+    private enum ModalitaRicerca {
+        NOME,
+        TIPO,
+        DATA
+    }
+
+    private enum StatoAttivita {
+        FUTURA,
+        IN_CORSO,
+        PASSATA,
+        COMPLETATA
+    }
+
+    @FXML private VBox contenitoreSchede;
+    @FXML private TextField campoRicerca;
+    @FXML private Label etichettaMese;
+    @FXML private GridPane grigliaCalendario;
+    @FXML private ToggleGroup gruppoFiltri;
+    @FXML private ToggleButton filtroTutte;
+    @FXML private ToggleButton filtroPersonali;
+    @FXML private ToggleButton filtroCondivise;
+    @FXML private MenuButton menuRicerca;
+    @FXML private Button btnAggiungi;
 
     private final AttivitaGestioneImp gestione = new AttivitaGestioneImp();
 
     private final DateTimeFormatter formatoData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private final DateTimeFormatter formatoOra  = DateTimeFormatter.ofPattern("HH:mm");
-    private YearMonth meseCorrente = YearMonth.now(); // mese visualizzato
-    private LocalDate giornoSelezionato = null;       // giorno cliccato (opzionale)
-
+    private final DateTimeFormatter formatoOra = DateTimeFormatter.ofPattern("HH:mm");
     private final DateTimeFormatter formatoMese = DateTimeFormatter.ofPattern("MMMM yyyy");
+    private final List<DateTimeFormatter> formatiDataRicerca = List.of(
+            DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+            DateTimeFormatter.ofPattern("dd-MM-yyyy"),
+            DateTimeFormatter.ISO_LOCAL_DATE
+    );
 
+    private YearMonth meseCorrente = YearMonth.now();
+    private LocalDate giornoSelezionato;
+    private ModalitaRicerca modalitaRicerca = ModalitaRicerca.NOME;
+    private Timeline timerNotifiche;
+    private Timeline timerStato;
+    private Utente utenteCorrente;
 
     @FXML
     private void initialize() {
         try {
             gestione.caricaDaDB();
-            aggiornaCalendario();
-            aggiornaLista();
         } catch (Exception e) {
-            new Alert(Alert.AlertType.ERROR, "Errore caricamento attività: " + e.getMessage()).showAndWait();
+            mostraErrore("Errore caricamento attivita: " + e.getMessage());
+        }
+
+        if (utenteCorrente == null) {
+            String email = SessioneUtente.getEmail();
+            if (email != null && !email.isBlank()) {
+                utenteCorrente = gestione.getUtentiDisponibili().stream()
+                        .filter(u -> u.getEmail().equalsIgnoreCase(email))
+                        .findFirst()
+                        .orElse(null);
+            }
+        }
+
+        preparaFiltri();
+        preparaRicerca();
+        preparaAzioniHeader();
+        preparaBottoneAggiungi();
+
+        aggiornaCalendario();
+        aggiornaLista();
+
+        Platform.runLater(this::avviaTimerNotifiche);
+        Platform.runLater(this::avviaTimerStato);
+    }
+
+    private void preparaFiltri() {
+        if (gruppoFiltri == null) {
+            gruppoFiltri = new ToggleGroup();
+        }
+        if (filtroTutte != null) {
+            filtroTutte.setToggleGroup(gruppoFiltri);
+            filtroTutte.setSelected(true);
+            filtroTutte.setOnAction(evento -> aggiornaLista());
+        }
+        if (filtroPersonali != null) {
+            filtroPersonali.setToggleGroup(gruppoFiltri);
+            filtroPersonali.setOnAction(evento -> aggiornaLista());
+        }
+        if (filtroCondivise != null) {
+            filtroCondivise.setToggleGroup(gruppoFiltri);
+            filtroCondivise.setOnAction(evento -> aggiornaLista());
+        }
+    }
+
+    private void preparaRicerca() {
+        if (menuRicerca != null) {
+            menuRicerca.setText("Nome");
+        }
+        if (campoRicerca != null) {
+            campoRicerca.setOnAction(evento -> applicaRicerca());
+        }
+    }
+
+    private void preparaAzioniHeader() {
+        if (etichettaMese != null && etichettaMese.getParent() instanceof HBox header) {
+            if (header.getChildren().size() >= 3) {
+                Node prev = header.getChildren().get(0);
+                Node next = header.getChildren().get(2);
+                if (prev instanceof Button btnPrev) {
+                    btnPrev.setOnAction(evento -> mesePrecedente());
+                }
+                if (next instanceof Button btnNext) {
+                    btnNext.setOnAction(evento -> meseSuccessivo());
+                }
+            }
+        }
+
+        Platform.runLater(() -> {
+            if (contenitoreSchede == null || contenitoreSchede.getScene() == null) {
+                return;
+            }
+            Parent root = contenitoreSchede.getScene().getRoot();
+            MenuButton menuUtente = (MenuButton) root.lookup(".user-menu");
+            if (menuUtente != null && menuUtente.getItems().isEmpty()) {
+                if (utenteCorrente != null) {
+                    menuUtente.setText(utenteCorrente.getNome() + " ▼");
+                }
+                MenuItem logout = new MenuItem("Logout");
+                logout.setOnAction(evento -> azioneLogout());
+                menuUtente.getItems().addAll(logout);
+            }
+        });
+    }
+
+    private void preparaBottoneAggiungi() {
+        if (btnAggiungi != null) {
+            btnAggiungi.setOnAction(evento -> aggiungiAttivita());
         }
     }
 
     private void aggiornaLista() {
+        if (contenitoreSchede == null) {
+            return;
+        }
         contenitoreSchede.getChildren().clear();
 
-        List<Attivita> lista = gestione.getTutteLeAttivita();
+        List<Attivita> lista = recuperaListaBase();
+        lista = applicaFiltri(lista);
+
         if (lista.isEmpty()) {
-            contenitoreSchede.getChildren().add(new Label("Nessuna attività."));
+            Label vuoto = new Label("Nessuna attivita.");
+            vuoto.getStyleClass().add("empty-table-label");
+            contenitoreSchede.getChildren().add(vuoto);
             return;
         }
 
-        for (Attivita a : lista) {
-            contenitoreSchede.getChildren().add(creaRigaAttivita(a));
+        for (Attivita attivita : lista) {
+            contenitoreSchede.getChildren().add(creaSchedaAttivita(attivita));
         }
     }
 
-    private HBox creaRigaAttivita(Attivita a) {
-        Label titolo = new Label(a.getDescrizione());
-        titolo.setMinWidth(240);
+    private List<Attivita> recuperaListaBase() {
+        String testo = campoRicerca != null ? campoRicerca.getText() : null;
+        boolean testoVuoto = testo == null || testo.isBlank();
 
-        Label tipo = new Label(a.getTipo().name());
-        tipo.setMinWidth(120);
+        try {
+            return switch (modalitaRicerca) {
+                case NOME -> testoVuoto ? gestione.getTutteLeAttivita() : gestione.cercaPerNome(testo.trim());
+                case TIPO -> testoVuoto ? gestione.getTutteLeAttivita() : gestione.cercaPerTipo(testo.trim());
+                case DATA -> recuperaPerData(testo);
+            };
+        } catch (IllegalArgumentException ex) {
+            mostraErrore(ex.getMessage());
+            return gestione.getTutteLeAttivita();
+        }
+    }
 
-        Label data = new Label(a.getDataInizio().toLocalDate().format(formatoData));
-        data.setMinWidth(110);
+    private List<Attivita> recuperaPerData(String testo) {
+        boolean testoVuoto = testo == null || testo.isBlank();
+        if (testoVuoto && giornoSelezionato != null) {
+            LocalDateTime inizio = giornoSelezionato.atStartOfDay();
+            LocalDateTime fine = giornoSelezionato.atTime(LocalTime.MAX);
+            return gestione.cercaPerData(inizio, fine);
+        }
+        if (testoVuoto) {
+            return gestione.getTutteLeAttivita();
+        }
+        IntervalloDate intervallo = leggiIntervallo(testo.trim());
+        return gestione.cercaPerData(intervallo.inizio, intervallo.fine);
+    }
 
-        Label ora = new Label(a.getDataInizio().toLocalTime().format(formatoOra));
-        ora.setMinWidth(80);
+    private List<Attivita> applicaFiltri(List<Attivita> lista) {
+        List<Attivita> filtrata = new ArrayList<>(lista);
 
-        Label assegnato = new Label(a.getUtenteAssegnato().getNome());
-        assegnato.setMinWidth(140);
+        if (filtroPersonali != null && filtroPersonali.isSelected()) {
+            filtrata.removeIf(attivita -> !attivita.isAttivitaPrivata());
+        } else if (filtroCondivise != null && filtroCondivise.isSelected()) {
+            filtrata.removeIf(Attivita::isAttivitaPrivata);
+        }
 
-        HBox riga = new HBox(12, titolo, tipo, data, ora, assegnato);
-        riga.setStyle("-fx-padding: 10; -fx-background-color: white; -fx-background-radius: 10;");
+        if (giornoSelezionato != null) {
+            filtrata.removeIf(attivita -> !attivitaInGiorno(attivita, giornoSelezionato));
+        }
+
+        filtraPerPrivacy(filtrata);
+        return filtrata;
+    }
+
+    private void filtraPerPrivacy(List<Attivita> lista) {
+        if (utenteCorrente == null) {
+            lista.clear();
+            return;
+        }
+        lista.removeIf(attivita -> attivita.isAttivitaPrivata() && !isProprietario(attivita));
+    }
+
+    private boolean isProprietario(Attivita attivita) {
+        if (utenteCorrente == null || attivita == null || attivita.getUtenteAssegnato() == null) {
+            return false;
+        }
+        return utenteCorrente.getEmail().equalsIgnoreCase(attivita.getUtenteAssegnato().getEmail());
+    }
+
+    private boolean attivitaInGiorno(Attivita attivita, LocalDate giorno) {
+        LocalDateTime inizio = attivita.getDataInizio();
+        LocalDateTime fine = attivita.getDataFine();
+        LocalDateTime start = giorno.atStartOfDay();
+        LocalDateTime end = giorno.atTime(LocalTime.MAX);
+        return !fine.isBefore(start) && !inizio.isAfter(end);
+    }
+
+    private HBox creaSchedaAttivita(Attivita attivita) {
+        HBox riga = new HBox(15);
+        riga.setAlignment(Pos.CENTER_LEFT);
+        riga.getStyleClass().add("activity-row-example");
+        riga.setMinHeight(70);
+        riga.setPrefHeight(70);
+        riga.setPadding(new Insets(0, 20, 0, 20));
+
+        HBox boxCheck = new HBox();
+        boxCheck.setAlignment(Pos.CENTER_LEFT);
+        boxCheck.setPrefWidth(90);
+        boxCheck.setMinWidth(90);
+        CheckBox checkCompletata = new CheckBox();
+        checkCompletata.setSelected(attivita.isCompletato());
+        checkCompletata.setDisable(attivita.isAttivitaPrivata() && !isProprietario(attivita));
+        checkCompletata.setOnAction(evento -> {
+            boolean selezionata = checkCompletata.isSelected();
+            if (selezionata) {
+                if (!attivitaIniziata(attivita)) {
+                    checkCompletata.setSelected(false);
+                    mostraErrore("L\u2019attivit\u00e0 non \u00e8 cominciata ancora");
+                    return;
+                }
+            }
+            attivita.setCompletato(selezionata);
+            if (attivita.getId() > 0) {
+                try {
+                    gestione.segnaCompletata(attivita.getId(), selezionata);
+                } catch (IllegalArgumentException ex) {
+                    mostraErrore(ex.getMessage());
+                }
+            }
+            aggiornaLista();
+        });
+        boxCheck.getChildren().add(checkCompletata);
+
+        VBox boxTitolo = new VBox();
+        boxTitolo.setAlignment(Pos.CENTER_LEFT);
+        boxTitolo.setPrefWidth(230);
+        boxTitolo.setMinWidth(230);
+        Label titolo = new Label(attivita.getDescrizione());
+        titolo.getStyleClass().add("activity-title");
+        if (attivita.isCompletato()) {
+            titolo.getStyleClass().add("activity-completed");
+        }
+        boxTitolo.getChildren().add(titolo);
+
+        HBox boxBadge = new HBox();
+        boxBadge.setAlignment(Pos.CENTER_LEFT);
+        boxBadge.setPrefWidth(130);
+        boxBadge.setMinWidth(130);
+        Label badge = new Label(attivita.isAttivitaPrivata() ? "Personale" : "Condivisa");
+        badge.getStyleClass().add(attivita.isAttivitaPrivata() ? "badge-personale" : "badge-condivisa");
+        boxBadge.getChildren().add(badge);
+
+        VBox boxData = new VBox();
+        boxData.setAlignment(Pos.CENTER_LEFT);
+        boxData.setPrefWidth(120);
+        boxData.setMinWidth(120);
+        Label data = new Label(attivita.getDataInizio().toLocalDate().format(formatoData));
+        data.getStyleClass().add("activity-date");
+        boxData.getChildren().add(data);
+
+        VBox boxOra = new VBox();
+        boxOra.setAlignment(Pos.CENTER_LEFT);
+        boxOra.setPrefWidth(110);
+        boxOra.setMinWidth(110);
+        String orario = attivita.getDataInizio().toLocalTime().format(formatoOra) + " - "
+                + attivita.getDataFine().toLocalTime().format(formatoOra);
+        Label ora = new Label(orario);
+        ora.getStyleClass().add("activity-time");
+        boxOra.getChildren().add(ora);
+
+        HBox boxStato = new HBox();
+        boxStato.setAlignment(Pos.CENTER_LEFT);
+        boxStato.setPrefWidth(110);
+        boxStato.setMinWidth(110);
+        Label statoLabel = creaBadgeStato(attivita);
+        boxStato.getChildren().add(statoLabel);
+
+        VBox boxUtente = new VBox();
+        boxUtente.setAlignment(Pos.CENTER_LEFT);
+        boxUtente.setPrefWidth(140);
+        boxUtente.setMinWidth(140);
+        Label utente = new Label(attivita.getUtenteAssegnato().getNome());
+        utente.getStyleClass().add("activity-assigned");
+        boxUtente.getChildren().add(utente);
+
+        Region spazio = new Region();
+        HBox.setHgrow(spazio, Priority.ALWAYS);
+
+        Button menu = new Button("...");
+        menu.getStyleClass().add("btn-actions");
+        ContextMenu menuAzioni = new ContextMenu();
+        MenuItem dettagli = new MenuItem("Dettagli");
+        dettagli.setOnAction(evento -> mostraDettagli(attivita));
+        MenuItem modifica = new MenuItem("Modifica");
+        modifica.setOnAction(evento -> modificaAttivita(attivita));
+        MenuItem elimina = new MenuItem("Elimina");
+        elimina.setOnAction(evento -> eliminaAttivita(attivita));
+        menuAzioni.getItems().addAll(dettagli, modifica, elimina);
+        menu.setOnAction(evento -> {
+            if (menuAzioni.isShowing()) {
+                menuAzioni.hide();
+            } else {
+                menuAzioni.show(menu, Side.BOTTOM, 0, 0);
+            }
+        });
+
+        HBox boxAzioni = new HBox(menu);
+        boxAzioni.setAlignment(Pos.CENTER_RIGHT);
+
+        riga.getChildren().addAll(boxCheck, boxTitolo, boxBadge, boxData, boxOra, boxStato, boxUtente, spazio, boxAzioni);
         return riga;
     }
-    
+
+    private void mostraDettagli(Attivita attivita) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Dettagli attivita");
+        alert.setHeaderText(attivita.getDescrizione());
+        alert.setContentText(formattaDettagli(attivita));
+        alert.showAndWait();
+    }
+
+    private Label creaBadgeStato(Attivita attivita) {
+        StatoAttivita stato = calcolaStatoAttivita(attivita);
+        String testo = switch (stato) {
+            case FUTURA -> "FUTURA";
+            case IN_CORSO -> "IN CORSO";
+            case PASSATA -> "PASSATA";
+            case COMPLETATA -> "COMPLETATA";
+        };
+        Label label = new Label(testo);
+        label.getStyleClass().add("stato-badge");
+        switch (stato) {
+            case FUTURA -> label.getStyleClass().add("stato-futura");
+            case IN_CORSO -> label.getStyleClass().add("stato-in-corso");
+            case PASSATA -> label.getStyleClass().add("stato-passata");
+            case COMPLETATA -> label.getStyleClass().add("stato-completata");
+        }
+        return label;
+    }
+
+    private StatoAttivita calcolaStatoAttivita(Attivita attivita) {
+        if (attivita.isCompletato()) {
+            return StatoAttivita.COMPLETATA;
+        }
+        LocalDateTime adesso = LocalDateTime.now();
+        if (adesso.isBefore(attivita.getDataInizio())) {
+            return StatoAttivita.FUTURA;
+        }
+        if (!adesso.isAfter(attivita.getDataFine())) {
+            return StatoAttivita.IN_CORSO;
+        }
+        return StatoAttivita.PASSATA;
+    }
+
+    private boolean attivitaIniziata(Attivita attivita) {
+        return !LocalDateTime.now().isBefore(attivita.getDataInizio());
+    }
+
+    private String formattaDettagli(Attivita attivita) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Tipo: ").append(attivita.getTipo()).append("\n");
+        builder.append("Inizio: ").append(formattaDataOra(attivita.getDataInizio())).append("\n");
+        builder.append("Fine: ").append(formattaDataOra(attivita.getDataFine())).append("\n");
+        builder.append("Notifica: ").append(formattaDataOra(attivita.getDataNotifica())).append("\n");
+        builder.append("Priorita: ").append(attivita.getPriorita()).append("\n");
+        builder.append("Utente: ").append(attivita.getUtenteAssegnato().getNome()).append("\n");
+        builder.append("Visibilita: ").append(attivita.isAttivitaPrivata() ? "Personale" : "Condivisa").append("\n");
+        String context = estraiContext(attivita);
+        if (context != null && !context.isBlank()) {
+            builder.append("Contesto: ").append(context).append("\n");
+        }
+        return builder.toString();
+    }
+
+    private String formattaDataOra(LocalDateTime dataOra) {
+        if (dataOra == null) {
+            return "-";
+        }
+        return dataOra.toLocalDate().format(formatoData) + " " + dataOra.toLocalTime().format(formatoOra);
+    }
+
+    private String estraiContext(Attivita attivita) {
+        if (attivita instanceof AttivitaStudio studio) {
+            return studio.getMateria();
+        }
+        if (attivita instanceof AttivitaSpesa spesa) {
+            return spesa.getNegozio();
+        }
+        if (attivita instanceof AttivitaDomestica domestica) {
+            return domestica.getStanzaCasa();
+        }
+        return null;
+    }
 
     // Top bar
-    @FXML private void azioneHome() {}
-    @FXML private void azioneNotifiche() {}
-    @FXML private void azioneProfilo() {}
-    @FXML private void azioneLogout() {}
+    @FXML
+    private void azioneHome() {
+        modalitaRicerca = ModalitaRicerca.NOME;
+        if (menuRicerca != null) {
+            menuRicerca.setText("Nome");
+        }
+        if (campoRicerca != null) {
+            campoRicerca.clear();
+        }
+        if (filtroTutte != null) {
+            filtroTutte.setSelected(true);
+        }
+        giornoSelezionato = null;
+        aggiornaCalendario();
+        aggiornaLista();
+    }
+
+    @FXML
+    private void azioneLogout() {
+        SessioneUtente.pulisci();
+        utenteCorrente = null;
+        try {
+            if (contenitoreSchede != null && contenitoreSchede.getScene() != null) {
+                Stage stage = (Stage) contenitoreSchede.getScene().getWindow();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/view/login.fxml"));
+                Parent root = loader.load();
+                double width = stage.getWidth() > 0 ? stage.getWidth() : 1500;
+                double height = stage.getHeight() > 0 ? stage.getHeight() : 800;
+                stage.setScene(new Scene(root, width, height));
+                stage.setTitle("Login");
+                stage.setResizable(true);
+                stage.setMinWidth(1500);
+                stage.setMinHeight(800);
+            }
+        } catch (Exception ex) {
+            mostraErrore("Errore logout.");
+        }
+    }
 
     // Filtri
-    @FXML private void filtroTutte() { aggiornaLista(); }
-    @FXML private void filtroPersonali() { aggiornaLista(); }
-    @FXML private void filtroCondivise() { aggiornaLista(); }
+    @FXML
+    private void filtroTutte() {
+        aggiornaLista();
+    }
+
+    @FXML
+    private void filtroPersonali() {
+        aggiornaLista();
+    }
+
+    @FXML
+    private void filtroCondivise() {
+        aggiornaLista();
+    }
 
     // Calendario
     @FXML
     private void mesePrecedente() {
         meseCorrente = meseCorrente.minusMonths(1);
+        if (giornoSelezionato != null && !YearMonth.from(giornoSelezionato).equals(meseCorrente)) {
+            giornoSelezionato = null;
+        }
         aggiornaCalendario();
+        aggiornaLista();
     }
+
     @FXML
     private void meseSuccessivo() {
         meseCorrente = meseCorrente.plusMonths(1);
+        if (giornoSelezionato != null && !YearMonth.from(giornoSelezionato).equals(meseCorrente)) {
+            giornoSelezionato = null;
+        }
         aggiornaCalendario();
+        aggiornaLista();
     }
 
     // Ricerca
-    @FXML private void cercaPerData() {}
-    @FXML private void cercaPerNome() {}
-    @FXML private void cercaPerTipo() {}
+    @FXML
+    private void cercaPerData() {
+        impostaModalitaRicerca(ModalitaRicerca.DATA, "Data", "Data (gg/MM/aaaa o gg/MM/aaaa - gg/MM/aaaa)");
+    }
+
+    @FXML
+    private void cercaPerNome() {
+        impostaModalitaRicerca(ModalitaRicerca.NOME, "Nome", "Cerca per nome");
+    }
+
+    @FXML
+    private void cercaPerTipo() {
+        impostaModalitaRicerca(ModalitaRicerca.TIPO, "Tipo", "Cerca per tipo (STUDIO, SPESA, DOMESTICA)");
+    }
+
+    @FXML
+    private void applicaRicerca() {
+        aggiornaLista();
+    }
+
+    private void impostaModalitaRicerca(ModalitaRicerca modalita, String testoMenu, String prompt) {
+        modalitaRicerca = modalita;
+        if (menuRicerca != null) {
+            menuRicerca.setText(testoMenu);
+        }
+        if (campoRicerca != null) {
+            campoRicerca.clear();
+            campoRicerca.setPromptText(prompt);
+        }
+        aggiornaLista();
+    }
 
     // CRUD
-    @FXML private void aggiungiAttivita() {}
+    @FXML
+    private void aggiungiAttivita() {
+        if (utenteCorrente == null) {
+            mostraErrore("Devi effettuare il login per aggiungere attivita.");
+            return;
+        }
+        Stage owner = getStage();
+        List<Utente> utenti = gestione.getUtentiDisponibili();
+        Optional<java.util.Map<String, Object>> risultato = DialogoAttivita.mostra(owner, "Nuova attivita", null, utenti, utenteCorrente);
+        risultato.ifPresent(parametri -> {
+            try {
+                if (utenteCorrente != null) {
+                    parametri.put("utenteAssegnato", utenteCorrente);
+                }
+                gestione.aggiungiAttivita(parametri);
+                aggiornaLista();
+                controllaNotifiche();
+            } catch (IllegalArgumentException ex) {
+                mostraErrore(ex.getMessage());
+            }
+        });
+    }
 
+    private void modificaAttivita(Attivita attivita) {
+        if (utenteCorrente == null) {
+            mostraErrore("Devi effettuare il login per modificare attivita.");
+            return;
+        }
+        Stage owner = getStage();
+        List<Utente> utenti = gestione.getUtentiDisponibili();
+        if (attivita.isAttivitaPrivata() && !isProprietario(attivita)) {
+            mostraErrore("Non puoi modificare attivita personali di altri utenti.");
+            return;
+        }
+        Utente utenteDialogo = isProprietario(attivita) ? utenteCorrente : attivita.getUtenteAssegnato();
+        Optional<java.util.Map<String, Object>> risultato = DialogoAttivita.mostra(owner, "Modifica attivita", attivita, utenti, utenteDialogo);
+        risultato.ifPresent(parametri -> {
+            try {
+                if (isProprietario(attivita) && utenteCorrente != null) {
+                    parametri.put("utenteAssegnato", utenteCorrente);
+                } else {
+                    parametri.put("utenteAssegnato", attivita.getUtenteAssegnato());
+                }
+                gestione.modificaAttivita(attivita.getId(), parametri);
+                aggiornaLista();
+                controllaNotifiche();
+            } catch (IllegalArgumentException ex) {
+                mostraErrore(ex.getMessage());
+            }
+        });
+    }
+
+    private void eliminaAttivita(Attivita attivita) {
+        if (utenteCorrente == null) {
+            mostraErrore("Devi effettuare il login per eliminare attivita.");
+            return;
+        }
+        if (attivita.isAttivitaPrivata() && !isProprietario(attivita)) {
+            mostraErrore("Non puoi eliminare attivita personali di altri utenti.");
+            return;
+        }
+        Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
+        conferma.setTitle("Conferma eliminazione");
+        conferma.setHeaderText("Eliminare l'attivita selezionata?");
+        conferma.setContentText(attivita.getDescrizione());
+        Optional<ButtonType> risposta = conferma.showAndWait();
+        if (risposta.isPresent() && risposta.get() == ButtonType.OK) {
+            try {
+                gestione.rimuoviAttivita(attivita.getId());
+                aggiornaLista();
+            } catch (IllegalArgumentException ex) {
+                mostraErrore(ex.getMessage());
+            }
+        }
+    }
 
     private void aggiornaCalendario() {
-        // aggiorna label mese
-        etichettaMese.setText(capitalize(formatoMese.format(meseCorrente.atDay(1))));
+        if (etichettaMese != null) {
+            etichettaMese.setText(capitalize(formatoMese.format(meseCorrente.atDay(1))));
+        }
 
-        // pulisci griglia
+        if (grigliaCalendario == null) {
+            return;
+        }
         grigliaCalendario.getChildren().clear();
         grigliaCalendario.getColumnConstraints().clear();
         grigliaCalendario.getRowConstraints().clear();
 
-        // 7 colonne uguali
         for (int c = 0; c < 7; c++) {
             ColumnConstraints cc = new ColumnConstraints();
             cc.setHgrow(Priority.ALWAYS);
@@ -140,7 +677,6 @@ public class MainLayoutController {
             grigliaCalendario.getColumnConstraints().add(cc);
         }
 
-        // 1 riga header + 6 righe settimane
         for (int r = 0; r < 7; r++) {
             RowConstraints rc = new RowConstraints();
             rc.setVgrow(Priority.ALWAYS);
@@ -148,25 +684,19 @@ public class MainLayoutController {
             grigliaCalendario.getRowConstraints().add(rc);
         }
 
-        // intestazione giorni (L M M G V S D)
         String[] giorni = {"L", "M", "M", "G", "V", "S", "D"};
         for (int c = 0; c < 7; c++) {
-            Button header = new Button(giorni[c]);
-            header.setDisable(true);
-            header.setMaxWidth(Double.MAX_VALUE);
-            header.setMaxHeight(Double.MAX_VALUE);
+            Label header = new Label(giorni[c]);
+            header.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            header.getStyleClass().add("calendar-day-header");
             GridPane.setHgrow(header, Priority.ALWAYS);
             GridPane.setVgrow(header, Priority.ALWAYS);
-            header.setStyle("-fx-opacity: 1; -fx-font-weight: bold;");
             grigliaCalendario.add(header, c, 0);
         }
 
         LocalDate primoGiorno = meseCorrente.atDay(1);
         int giorniNelMese = meseCorrente.lengthOfMonth();
-
-        // offset: in Java DayOfWeek MONDAY=1 ... SUNDAY=7
-        int offset = primoGiorno.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue();
-        if (offset < 0) offset += 7;
+        int offset = primoGiorno.getDayOfWeek().getValue() - 1;
 
         int riga = 1;
         int colonna = offset;
@@ -175,52 +705,161 @@ public class MainLayoutController {
             LocalDate data = meseCorrente.atDay(giorno);
 
             ToggleButton btn = new ToggleButton(String.valueOf(giorno));
-            btn.setMaxWidth(Double.MAX_VALUE);
-            btn.setMaxHeight(Double.MAX_VALUE);
-            btn.setMinSize(34, 28);
+            btn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            btn.setMinSize(32, 28);
+            btn.setPrefSize(34, 28);
+            btn.setPadding(Insets.EMPTY);
             btn.setAlignment(Pos.CENTER);
+            btn.getStyleClass().add("calendar-day");
+            btn.setTextOverrun(OverrunStyle.CLIP);
 
-            GridPane.setHgrow(btn, Priority.ALWAYS);
-            GridPane.setVgrow(btn, Priority.ALWAYS);
+            if (giornoSelezionato != null && data.equals(giornoSelezionato)) {
+                btn.getStyleClass().add("calendar-day-selected");
+                btn.setSelected(true);
+            }
 
-            btn.setStyle(stileGiorno(data));
-
-            btn.setOnAction(e -> {
-                giornoSelezionato = data;
+            btn.setOnAction(evento -> {
+                if (data.equals(giornoSelezionato)) {
+                    giornoSelezionato = null;
+                } else {
+                    giornoSelezionato = data;
+                }
                 aggiornaCalendario();
+                aggiornaLista();
             });
 
-            // evidenzia oggi
-            if (data.equals(LocalDate.now())) {
-                btn.setStyle(btn.getStyle() + " -fx-border-color: white; -fx-border-width: 1;");
-            }
-
-            // evidenzia selezione
-            if (giornoSelezionato != null && data.equals(giornoSelezionato)) {
-                btn.setSelected(true);
-                btn.setStyle(btn.getStyle() + " -fx-background-color: rgba(255,255,255,0.35);");
-            }
-
             grigliaCalendario.add(btn, colonna, riga);
-
             colonna++;
             if (colonna == 7) {
                 colonna = 0;
                 riga++;
             }
         }
+    }
+
+    private void avviaTimerNotifiche() {
+        if (timerNotifiche != null) {
+            timerNotifiche.stop();
+        }
+        timerNotifiche = new Timeline(new KeyFrame(Duration.seconds(45), evento -> controllaNotifiche()));
+        timerNotifiche.setCycleCount(Timeline.INDEFINITE);
+        timerNotifiche.play();
+        controllaNotifiche();
+    }
+
+    private void controllaNotifiche() {
+        try {
+            List<Attivita> daNotificare = gestione.getAttivitaDaNotificare(LocalDateTime.now());
+            if (daNotificare.isEmpty()) {
+                return;
+            }
+            for (Attivita attivita : daNotificare) {
+                if (utenteCorrente == null) {
+                    continue;
+                }
+                if (attivita.isAttivitaPrivata() && !isProprietario(attivita)) {
+                    continue;
+                }
+                String orario = formattaDataOra(attivita.getDataInizio());
+                String messaggio = "L'attivita (" + attivita.getDescrizione() + "), creata da "
+                        + attivita.getUtenteAssegnato().getNome()
+                        + ", iniziera il " + attivita.getDataInizio().toLocalDate().format(formatoData)
+                        + " alle ore " + attivita.getDataInizio().toLocalTime().format(formatoOra);
+                Node ancora = btnAggiungi != null ? btnAggiungi : contenitoreSchede;
+                if (ancora != null) {
+                    NotificaToast.mostra(ancora, "Notifica Attivita", messaggio, orario);
+                }
+                gestione.segnaNotificata(attivita.getId(), true);
+            }
+        } catch (Exception ex) {
+            // Evita di bloccare il timer per errori sporadici
+        }
+    }
+
+    private void avviaTimerStato() {
+        if (timerStato != null) {
+            timerStato.stop();
+        }
+        timerStato = new Timeline(new KeyFrame(Duration.seconds(30), evento -> aggiornaLista()));
+        timerStato.setCycleCount(Timeline.INDEFINITE);
+        timerStato.play();
+    }
+
+    private Stage getStage() {
+        if (contenitoreSchede == null || contenitoreSchede.getScene() == null) {
+            return null;
+        }
+        return (Stage) contenitoreSchede.getScene().getWindow();
+    }
+
+    private void mostraErrore(String messaggio) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Errore");
+        alert.setHeaderText(null);
+        alert.setContentText(messaggio);
+        Stage owner = getStage();
+        if (owner != null) {
+            alert.initOwner(owner);
+        }
+        alert.show();
+    }
+
+    private IntervalloDate leggiIntervallo(String testo) {
+        String[] parti;
+        if (testo.contains(";")) {
+            parti = testo.split("\\s*;\\s*");
+        } else if (testo.contains(" - ")) {
+            parti = testo.split("\\s-\\s");
+        } else {
+            parti = new String[]{testo};
+        }
+
+        if (parti.length == 1) {
+            LocalDate data = parseData(parti[0]);
+            return new IntervalloDate(data.atStartOfDay(), data.atTime(LocalTime.MAX));
+        }
+        if (parti.length == 2) {
+            LocalDate inizio = parseData(parti[0]);
+            LocalDate fine = parseData(parti[1]);
+            if (inizio.isAfter(fine)) {
+                throw new IllegalArgumentException("Intervallo data non valido.");
+            }
+            return new IntervalloDate(inizio.atStartOfDay(), fine.atTime(LocalTime.MAX));
+        }
+        throw new IllegalArgumentException("Formato data non valido.");
+    }
+
+    private LocalDate parseData(String valore) {
+        for (DateTimeFormatter formatter : formatiDataRicerca) {
+            try {
+                return LocalDate.parse(valore.trim(), formatter);
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+        throw new IllegalArgumentException("Formato data non valido. Usa gg/MM/aaaa.");
+    }
+
+    private static String capitalize(String s) {
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
+
+    public void impostaUtenteCorrente(Utente utente) {
+        this.utenteCorrente = utente;
+        Platform.runLater(() -> {
+            if (contenitoreSchede == null || contenitoreSchede.getScene() == null) {
+                return;
+            }
+            Parent root = contenitoreSchede.getScene().getRoot();
+            MenuButton menuUtente = (MenuButton) root.lookup(".user-menu");
+            if (menuUtente != null && utenteCorrente != null) {
+                menuUtente.setText(utenteCorrente.getNome() + " ▼");
+            }
+        });
+    }
+
+    private record IntervalloDate(LocalDateTime inizio, LocalDateTime fine) {}
 }
 
-private String stileGiorno(LocalDate data) {
-    return "-fx-background-color: rgba(255,255,255,0.18);"
-         + "-fx-text-fill: white;"
-         + "-fx-background-radius: 8;";
-}
-
-private static String capitalize(String s) {
-    if (s == null || s.isEmpty()) return s;
-    return s.substring(0, 1).toUpperCase() + s.substring(1);
-}
-
-
-}

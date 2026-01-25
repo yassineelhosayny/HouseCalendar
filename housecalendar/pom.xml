@@ -35,10 +35,15 @@
             <artifactId>javafx-controls</artifactId>
             <version>21.0.4</version>
             </dependency>
-            <dependency>
+        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>21.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.36</version>
         </dependency>
 
     </dependencies>

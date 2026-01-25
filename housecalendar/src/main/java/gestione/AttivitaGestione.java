@@ -33,4 +33,7 @@ public interface AttivitaGestione {
         public List<Attivita> getTutteLeAttivita();
         public void caricaDaDB();
         TipoAttivita getTipoByString(String strTipo);
+        // Stato completamento
+        void segnaCompletata(int idAttivita, boolean value);
 }
+

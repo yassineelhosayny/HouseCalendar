@@ -8,12 +8,12 @@
       xmlns:fx="http://javafx.com/fxml"
       styleClass="notification-container"
       stylesheets="@../style/app.css"
-      spacing="15"
-      prefWidth="350"
-      prefHeight="200">
+      spacing="18"
+      prefWidth="520"
+      prefHeight="280">
     
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="32" right="32" bottom="32" left="32"/>
     </padding>
     
     <!-- Header con Chiudi -->
@@ -37,7 +37,7 @@
     
     <!-- Azioni -->
     <HBox alignment="CENTER_RIGHT" spacing="10">
-        <Button fx:id="btnDismiss" styleClass="btn-secondary" text="Ignora"/>
+        <Button fx:id="btnDismiss" styleClass="btn-primary" text="OK"/>
         <Button fx:id="btnAction" styleClass="btn-primary" text="Visualizza"/>
     </HBox>
 </VBox>

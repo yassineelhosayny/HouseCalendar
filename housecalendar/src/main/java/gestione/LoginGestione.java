@@ -21,25 +21,13 @@ public class LoginGestione {
         if (ok) {
             // carico l'utente dal DB e lo salvo come utente corrente
             utenteAttuale = UtenteDAO.getUtenteByEmail(email);
+            if (utenteAttuale != null) {
+                SessioneUtente.salvaEmail(utenteAttuale.getEmail());
+            }
             return true;
         }
 
         return false;
-    }
-
-    //logout
-    public void logout() {
-        utenteAttuale = null;
-    }
-
-    // è loggato
-    public boolean isLoggato() {
-        return utenteAttuale != null;
-    }
-
-    //utente attuale
-    public Utente getUtenteAttuale() {
-        return utenteAttuale;
     }
 
     //REGISTRAZIONE 
