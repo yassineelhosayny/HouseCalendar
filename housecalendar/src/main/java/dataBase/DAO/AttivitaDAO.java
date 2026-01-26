@@ -158,9 +158,7 @@ public class AttivitaDAO {
                 boolean completato = rs.getInt("completato") == 1;
 
                 // utente (join)
-                String nome = rs.getString("nome");
-                String email = rs.getString("email");
-                Utente utente = new Utente(nome, email);
+                Utente utente = buildUtenteSafe(rs.getString("nome"), rs.getString("email"));
 
                 // Factory crea la sottoclasse 
                 Attivita a = AttivitaFactory.crea(
@@ -189,9 +187,7 @@ public class AttivitaDAO {
         try {
             conn = DBConnection.startConnection(null, "");
             ensureCompletatoColumn(conn);
-            ensureOwnerEmail(conn);
             ensureUtenteIdColumn(conn);
-            ensureOwnerEmail(conn);
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, value ? 1 : 0);
             ps.setInt(2, idAttivita);
@@ -221,7 +217,6 @@ public class AttivitaDAO {
         try {
             conn = DBConnection.startConnection(null, "");
             ensureCompletatoColumn(conn);
-            ensureOwnerEmail(conn);
             ensureUtenteIdColumn(conn);
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, now.toString());
@@ -242,9 +237,7 @@ public class AttivitaDAO {
                 boolean notificata = rs.getInt("notificata") == 1; // qui sara sempre false, leggiamo lo stesso
                 boolean completato = rs.getInt("completato") == 1;
 
-                String nome = rs.getString("nome");
-                String email = rs.getString("email");
-                Utente utente = new Utente(nome, email);
+                Utente utente = buildUtenteSafe(rs.getString("nome"), rs.getString("email"));
 
                 Attivita a = AttivitaFactory.crea(
                         descrizione, tipo, dataInizio, dataFine, dataNotifica,
@@ -296,29 +289,6 @@ public class AttivitaDAO {
         }
     }
 
-    private static void ensureOwnerEmail(Connection conn) {
-        if (conn == null) {
-            return;
-        }
-        String emailDefault = null;
-        try (PreparedStatement ps = conn.prepareStatement("SELECT email FROM utente ORDER BY email LIMIT 1");
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                emailDefault = rs.getString("email");
-            }
-        } catch (Exception ignored) {
-        }
-        if (emailDefault == null || emailDefault.isBlank()) {
-            return;
-        }
-        try (PreparedStatement update = conn.prepareStatement(
-                "UPDATE attivita SET utente_email = ? WHERE utente_email IS NULL OR utente_email = ''")) {
-            update.setString(1, emailDefault);
-            update.executeUpdate();
-        } catch (Exception ignored) {
-        }
-    }
-
     private static void ensureUtenteIdColumn(Connection conn) {
         if (conn == null) {
             return;
@@ -364,6 +334,13 @@ public class AttivitaDAO {
         return 0;
     }
 
+    private static Utente buildUtenteSafe(String nome, String email) {
+        String fallbackNome = (nome == null || nome.isBlank()) ? "Utente sconosciuto" : nome;
+        String fallbackEmail = (email == null || email.isBlank() || !email.contains("@"))
+                ? "sconosciuto@local" : email;
+        return new Utente(fallbackNome, fallbackEmail);
+    }
+
     public static boolean setCompletata(int idAttivita, boolean value) {
         Connection conn = null;
         String sql = "UPDATE attivita SET completato=? WHERE id=?";
@@ -371,7 +348,6 @@ public class AttivitaDAO {
         try {
             conn = DBConnection.startConnection(null, "");
             ensureCompletatoColumn(conn);
-            ensureOwnerEmail(conn);
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, value ? 1 : 0);
             ps.setInt(2, idAttivita);

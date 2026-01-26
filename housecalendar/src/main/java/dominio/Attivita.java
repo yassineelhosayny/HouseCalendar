@@ -22,7 +22,6 @@ public abstract class Attivita {
     //costrutorre generale per Attivita
     public Attivita(String descrizione, TipoAttivita tipo, LocalDateTime dataInizio, LocalDateTime dataFine, LocalDateTime dataNotifica, int priorita, Utente utenteAssegnato, boolean attivitaPrivata, boolean notificata) {
     	
-        
         if(priorita < 1 || priorita > 3){
             throw new IllegalArgumentException("La priorità deve essere compresa tra 1 e 3.");
         }

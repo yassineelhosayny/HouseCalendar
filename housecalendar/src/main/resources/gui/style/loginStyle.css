@@ -1,0 +1,50 @@
+.button {
+    -fx-background-color: #333333;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-background-radius: 12;
+    -fx-padding: 6 16;
+}
+
+.button:hover {
+    -fx-background-color: #555555;
+}
+
+.label {
+    -fx-text-fill: #111111;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.text-field, .password-field {
+    -fx-background-color: white;
+    -fx-text-fill: #111111;
+    -fx-font-size: 14px;
+    -fx-font-weight: normal;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 6 12;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 2, 0, 0, 1);
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #000000;
+    -fx-border-width: 2;
+}
+
+.text-field .text, .password-field .text {
+    -fx-prompt-text-fill: #999999;
+}
+
+.auth-card {
+    -fx-background-color: rgba(255, 255, 255, 0.94);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(0, 0, 0, 0.12);
+    -fx-border-width: 1;
+    -fx-padding: 24 28;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 20, 0, 0, 6);
+}

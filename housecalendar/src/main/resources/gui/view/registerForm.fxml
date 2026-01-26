@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1600.0" style="-fx-background-color: #f6f6f6;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.RegistrazioneController">
+   <children>
+      <ImageView fitHeight="900.0" fitWidth="1600.0" pickOnBounds="true" preserveRatio="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <image>
+            <Image url="@../images/4516.jpg" />
+         </image>
+      </ImageView>
+      <AnchorPane prefHeight="500.0" prefWidth="440.0" style="-fx-background-color: rgba(220, 38, 38, 0.92); -fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #B91C1C; -fx-border-width: 1.2; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 25, 0.2, 0, 8);" AnchorPane.rightAnchor="180.0" AnchorPane.topAnchor="160.0">
+         <children>
+            <Label layoutX="155.0" layoutY="40.0" text="Registrati" textFill="#ffffff">
+               <font>
+                  <Font name="System Bold" size="22.0" />
+               </font>
+            </Label>
+            <TextField fx:id="campoNome" focusTraversable="false" layoutX="40.0" layoutY="110.0" prefHeight="38.0" prefWidth="360.0" promptText="username" style="-fx-background-color: #ffffff; -fx-text-fill: #111111; -fx-prompt-text-fill: #8b8b8b; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #FEE2E2; -fx-border-width: 1.2;" />
+            <TextField fx:id="campoEmail" focusTraversable="false" layoutX="40.0" layoutY="165.0" prefHeight="38.0" prefWidth="360.0" promptText="email" style="-fx-background-color: #ffffff; -fx-text-fill: #111111; -fx-prompt-text-fill: #8b8b8b; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #FEE2E2; -fx-border-width: 1.2;" />
+            <PasswordField fx:id="campoPassword" focusTraversable="false" layoutX="40.0" layoutY="220.0" prefHeight="38.0" prefWidth="360.0" promptText="password" style="-fx-background-color: #ffffff; -fx-text-fill: #111111; -fx-prompt-text-fill: #8b8b8b; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #FEE2E2; -fx-border-width: 1.2;" />
+            <PasswordField fx:id="campoConferma" focusTraversable="false" layoutX="40.0" layoutY="275.0" prefHeight="38.0" prefWidth="360.0" promptText="conferma password" style="-fx-background-color: #ffffff; -fx-text-fill: #111111; -fx-prompt-text-fill: #8b8b8b; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #FEE2E2; -fx-border-width: 1.2;" />
+            <Label fx:id="labelErrore" layoutX="40.0" layoutY="320.0" textFill="#ffd0d0" />
+            <Button layoutX="40.0" layoutY="365.0" mnemonicParsing="false" onAction="#azioneRegistrazione" prefHeight="38.0" prefWidth="360.0" style="-fx-background-color: #B91C1C; -fx-background-radius: 10; -fx-font-weight: bold;" text="Crea account" textFill="#ffffff" />
+            <Button layoutX="40.0" layoutY="415.0" mnemonicParsing="false" onAction="#vaiLogin" prefHeight="36.0" prefWidth="360.0" style="-fx-background-color: #111111; -fx-background-radius: 10; -fx-font-weight: bold;" text="Torna indietro" textFill="#ffffff" />
+         </children>
+      </AnchorPane>
+      <Label layoutX="170.0" layoutY="760.0" text="Tutti i diritti riservati (c)" textFill="#3f3f3f" />
+   </children>
+</AnchorPane>

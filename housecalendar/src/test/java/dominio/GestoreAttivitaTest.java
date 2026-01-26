@@ -55,18 +55,10 @@ class GestoreAttivitaTest {
         }catch (Exception ignored) {}
     }
 
-private Attivita creaAttivitaConFactory(String descrizione, TipoAttivita tipo,
-                                        LocalDateTime inizio, LocalDateTime fine,
-                                        int priorita, boolean privata, String context) {
+private Attivita creaAttivitaConFactory(String descrizione, TipoAttivita tipo,LocalDateTime inizio, LocalDateTime fine,int priorita, boolean privata, String context) {
 
-    LocalDateTime notifica = inizio.minusMinutes(10); // sempre presente nei test
-
-    return AttivitaFactory.crea(
-            descrizione, tipo,
-            inizio, fine, notifica,
-            priorita, utenteTest, privata,
-            context,false
-    );
+    LocalDateTime notifica = inizio.minusMinutes(10); //sempre presente nei test
+        return AttivitaFactory.crea(descrizione, tipo, inizio, fine, notifica,priorita, utenteTest, privata,context,false);
 }
 
 
@@ -114,8 +106,8 @@ private int trovaIdPerDescrizione(String descrizione) {
     @Test
     void testAggiungiGetByIdERimuovi() {
         String desc = "TEST_aggiungi_1";
-        LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-        LocalDateTime fine = LocalDateTime.of(2026, 10, 16, 10, 0);
+        LocalDateTime inizio = LocalDateTime.of(2027, 10, 16, 8, 0);
+        LocalDateTime fine = LocalDateTime.of(2027, 10, 16, 10, 0);
 
         Attivita a = creaAttivitaConFactory(desc, TipoAttivita.STUDIO, inizio, fine, 2, false, "Programmazione");
 
@@ -143,8 +135,8 @@ private int trovaIdPerDescrizione(String descrizione) {
 @Test
 void testRimuoviAttivitaById() {
     String desc = "TEST_rimuovi_separamente";
-    LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine = LocalDateTime.of(2026, 10, 16, 10, 0);
+    LocalDateTime inizio = LocalDateTime.of(2027, 10, 16, 8, 0);
+    LocalDateTime fine = LocalDateTime.of(2027, 10, 16, 10, 0);
 
     Attivita a = creaAttivitaConFactory(desc, TipoAttivita.DOMESTICA, inizio, fine, 1, false, "Cucina");
     gestione.aggiungiAttivita(parametriDiUnaAttivita(a));
@@ -161,14 +153,13 @@ void testRimuoviAttivitaById() {
 //se una utente ha già assegnato una data a una attivita non po creare un altra nello stesso intervallo
 @Test
 void testVerificaConflitti() {
-    LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine = LocalDateTime.of(2026, 10, 16, 10, 0);
+    LocalDateTime inizio = LocalDateTime.of(2027, 10, 16, 8, 0);
+    LocalDateTime fine = LocalDateTime.of(2027, 10, 16, 10, 0);
 
     String desc = "TEST_JUNIT_conf_1";
 
     // attività già presente 08:00-10:00
-    gestione.aggiungiAttivita(parametriDiUnaAttivita(
-            creaAttivitaConFactory(desc, TipoAttivita.STUDIO, inizio, fine, 1, false, "Prog")));
+    gestione.aggiungiAttivita(parametriDiUnaAttivita(creaAttivitaConFactory(desc, TipoAttivita.STUDIO, inizio, fine, 1, false, "Prog")));
     gestione.caricaDaDB();
     id1 = trovaIdPerDescrizione(desc);
 
@@ -176,8 +167,8 @@ void testVerificaConflitti() {
     Attivita nuova = creaAttivitaConFactory(
             "TEST_JUNIT_conf_2",
             TipoAttivita.STUDIO,
-            LocalDateTime.of(2026, 10, 16, 9, 0),
-            LocalDateTime.of(2026, 10, 16, 9, 30),
+            LocalDateTime.of(2027, 10, 16, 9, 0),
+            LocalDateTime.of(2027, 10, 16, 9, 30),
             1, false, "Prog"
     );
 
@@ -194,8 +185,8 @@ void testVerificaConflitti() {
 @Test
 void testModificaAttivita() {
     String desc = "TEST_modifica";
-    LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine = LocalDateTime.of(2026, 10, 16, 10, 0);
+    LocalDateTime inizio = LocalDateTime.of(2027, 10, 16, 8, 0);
+    LocalDateTime fine = LocalDateTime.of(2027, 10, 16, 10, 0);
 
     // Creo e aggiungo
     Attivita a = creaAttivitaConFactory(desc, TipoAttivita.SPESA, inizio, fine, 1, false, "Conad");
@@ -218,8 +209,8 @@ void testModificaAttivita() {
 @Test
 void testCercaPerDataIntervallo() {
     String desc = "TEST_JUNIT_data_1";
-    LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine = LocalDateTime.of(2026, 10, 16, 10, 0);
+    LocalDateTime inizio = LocalDateTime.of(2027, 10, 16, 8, 0);
+    LocalDateTime fine = LocalDateTime.of(2027, 10, 16, 10, 0);
 
     Attivita a = creaAttivitaConFactory(desc, TipoAttivita.STUDIO, inizio, fine, 2, false, "Programmazione");
     gestione.aggiungiAttivita(parametriDiUnaAttivita(a));
@@ -227,8 +218,8 @@ void testCercaPerDataIntervallo() {
     id1 = trovaIdPerDescrizione(desc);
 
     // Cerco una finestra che si sovrappone (09:00-09:30)
-    LocalDateTime ricercaInizio = LocalDateTime.of(2026, 10, 16, 9, 0);
-    LocalDateTime ricercaFine = LocalDateTime.of(2026, 10, 16, 9, 30);
+    LocalDateTime ricercaInizio = LocalDateTime.of(2027, 10, 16, 9, 0);
+    LocalDateTime ricercaFine = LocalDateTime.of(2027, 10, 16, 9, 30);
 
     List<Attivita> risultati = gestione.cercaPerData(ricercaInizio, ricercaFine);
     assertTrue(risultati.stream().anyMatch(x -> x.getId() == id1));
@@ -236,10 +227,10 @@ void testCercaPerDataIntervallo() {
 
 @Test
 void testCercaPerNome() {
-    LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine = LocalDateTime.of(2026, 10, 16, 10, 0);  //8-10
-    LocalDateTime inizio2 = LocalDateTime.of(2026, 10, 16, 10, 0); //10-12
-    LocalDateTime fine2 = LocalDateTime.of(2026, 10, 16, 12, 0);
+    LocalDateTime inizio = LocalDateTime.of(2027, 10, 16, 8, 0);
+    LocalDateTime fine = LocalDateTime.of(2027, 10, 16, 10, 0);  //8-10
+    LocalDateTime inizio2 = LocalDateTime.of(2027, 10, 16, 10, 0); //10-12
+    LocalDateTime fine2 = LocalDateTime.of(2027, 10, 16, 12, 0);
     String d1 = "TEST_nome_spesa_1";
     String d2 = "TEST_nome_spesa_2";
 
@@ -259,8 +250,8 @@ void testCercaPerNome() {
 @Test
 void testCercaPerTipo() {
     String desc = "TEST_tipo_domestica_1";
-    LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine = LocalDateTime.of(2026, 10, 16, 10, 0);
+    LocalDateTime inizio = LocalDateTime.of(2027, 10, 16, 8, 0);
+    LocalDateTime fine = LocalDateTime.of(2027, 10, 16, 10, 0);
 
     gestione.aggiungiAttivita(parametriDiUnaAttivita(
             creaAttivitaConFactory(desc, TipoAttivita.DOMESTICA, inizio, fine, 1, false, "Bagno")));
@@ -275,8 +266,8 @@ void testCercaPerTipo() {
 @Test
 void testCercaPerId() {
     String desc = "TEST_id_1";
-    LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine = LocalDateTime.of(2026, 10, 16, 10, 0);
+    LocalDateTime inizio = LocalDateTime.of(2027, 10, 16, 8, 0);
+    LocalDateTime fine = LocalDateTime.of(2027, 10, 16, 10, 0);
 
     gestione.aggiungiAttivita(parametriDiUnaAttivita(
             creaAttivitaConFactory(desc, TipoAttivita.STUDIO, inizio, fine, 1, false, "Reti")));
@@ -291,10 +282,10 @@ void testCercaPerId() {
 
 @Test
 void testCercaPerPriorita() {
-    LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine = LocalDateTime.of(2026, 10, 16, 10, 0);
-    LocalDateTime inizio2 = LocalDateTime.of(2026, 10, 16, 10, 0);
-    LocalDateTime fine2 = LocalDateTime.of(2026, 10, 16, 12, 0);
+    LocalDateTime inizio = LocalDateTime.of(2027, 10, 16, 8, 0);
+    LocalDateTime fine = LocalDateTime.of(2027, 10, 16, 10, 0);
+    LocalDateTime inizio2 = LocalDateTime.of(2027, 10, 16, 10, 0);
+    LocalDateTime fine2 = LocalDateTime.of(2027, 10, 16, 12, 0);
 
     String d1 = "TEST_prio_1";
     String d2 = "TEST_prio_3";
@@ -315,8 +306,8 @@ void testCercaPerPriorita() {
 @Test
 void testFiltra() {
     String desc = "TEST_filtra_1";
-    LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine = LocalDateTime.of(2026, 10, 16, 10, 0);
+    LocalDateTime inizio = LocalDateTime.of(2027, 10, 16, 8, 0);
+    LocalDateTime fine = LocalDateTime.of(2027, 10, 16, 10, 0);
 
     gestione.aggiungiAttivita(parametriDiUnaAttivita(
             creaAttivitaConFactory(desc, TipoAttivita.STUDIO, inizio, fine, 2, false, "Algoritmi")));
@@ -338,8 +329,8 @@ void testFiltra() {
 
 @Test
 void testOrdinaPerNome() {
-    LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine   = LocalDateTime.of(2026, 10, 16, 9, 0);
+    LocalDateTime inizio = LocalDateTime.of(2028, 10, 16, 8, 0);
+    LocalDateTime fine   = LocalDateTime.of(2028, 10, 16, 9, 0);
 
     Attivita a1 = creaAttivitaConFactory("B-progetto java", TipoAttivita.STUDIO, inizio, fine, 1, false, "Java");
     Attivita a2 = creaAttivitaConFactory("A-reti", TipoAttivita.STUDIO, inizio.plusHours(1), fine.plusHours(1), 1, false, "Java");
@@ -361,8 +352,8 @@ void testOrdinaPerNome() {
 
 @Test
 void testOrdinaPerPriorita() {
-    LocalDateTime inizio = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine   = LocalDateTime.of(2026, 10, 16, 9, 0);
+    LocalDateTime inizio = LocalDateTime.of(2028, 10, 16, 8, 0);
+    LocalDateTime fine   = LocalDateTime.of(2028, 10, 16, 9, 0);
 
     Attivita bassa = creaAttivitaConFactory("Bassa", TipoAttivita.DOMESTICA, inizio, fine, 1, false, "Cucina");
     Attivita alta  = creaAttivitaConFactory("Alta", TipoAttivita.DOMESTICA, inizio.plusHours(1), fine.plusHours(1), 3, false, "Cucina");
@@ -384,11 +375,11 @@ void testOrdinaPerPriorita() {
 
 @Test
 void testOrdinaPerData() {
-    LocalDateTime inizio1 = LocalDateTime.of(2026, 10, 16, 8, 0);
-    LocalDateTime fine1   = LocalDateTime.of(2026, 10, 16, 9, 0);
+    LocalDateTime inizio1 = LocalDateTime.of(2028, 10, 16, 8, 0);
+    LocalDateTime fine1   = LocalDateTime.of(2028, 10, 16, 9, 0);
 
-    LocalDateTime inizio2 = LocalDateTime.of(2026, 10, 17, 8, 0);
-    LocalDateTime fine2   = LocalDateTime.of(2026, 10, 17, 9, 0);
+    LocalDateTime inizio2 = LocalDateTime.of(2028, 10, 17, 10, 0);
+    LocalDateTime fine2   = LocalDateTime.of(2028, 10, 17, 11, 0);
 
     Attivita prima = creaAttivitaConFactory("prima", TipoAttivita.SPESA, inizio2, fine2, 1, false, "Market");
     Attivita seconda = creaAttivitaConFactory("seconda", TipoAttivita.SPESA, inizio1, fine1, 1, false, "Market");
@@ -401,7 +392,16 @@ void testOrdinaPerData() {
 
     List<Attivita> lista = gestione.getTutteLeAttivita();
 
-    assertEquals("seconda", lista.get(0).getDescrizione());
+    // trova le posizioni di seconda e prima
+    int idSeconda = -1;
+    int idPrima = -1;
+    for (int i = 0; i < lista.size(); i++) {
+        String d = lista.get(i).getDescrizione();
+        if ("seconda".equals(d)) idSeconda = i;
+        if ("prima".equals(d)) idPrima = i;
+    }
+    assertTrue(idSeconda >= 0 && idPrima >= 0);
+    assertTrue(idSeconda < idPrima);
 
     id1 = trovaIdPerDescrizione("prima");
     id2 = trovaIdPerDescrizione("seconda");

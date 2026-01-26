@@ -62,17 +62,20 @@ public class RegistrazioneController {
             if (stage == null) {
                 return;
             }
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/view/login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/view/loginForm.fxml"));
             Parent root = loader.load();
-            double width = stage.getWidth() > 0 ? stage.getWidth() : 1500;
-            double height = stage.getHeight() > 0 ? stage.getHeight() : 800;
-            Scene scene = new Scene(root, width, height);
-            stage.setTitle("Login");
+            Scene scene = new Scene(root, 1600, 900);
+            stage.setTitle("Accedi");
             stage.setScene(scene);
-            stage.setResizable(true);
+            stage.setResizable(false);
             stage.setMaximized(false);
-            stage.setMinWidth(1500);
-            stage.setMinHeight(800);
+            stage.setFullScreen(false);
+            stage.setMinWidth(1600);
+            stage.setMinHeight(900);
+            stage.setMaxWidth(1600);
+            stage.setMaxHeight(900);
+            stage.setWidth(1600);
+            stage.setHeight(900);
             stage.show();
             javafx.application.Platform.runLater(stage::centerOnScreen);
         } catch (Exception e) {
@@ -92,4 +95,5 @@ public class RegistrazioneController {
         }
         return null;
     }
+
 }

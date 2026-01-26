@@ -39,7 +39,7 @@
             
             <!-- User Info -->
             <HBox alignment="CENTER_RIGHT" spacing="15">
-                <MenuButton styleClass="user-menu" text="Mario ▼" />
+                <MenuButton fx:id="menuUtente" styleClass="user-menu" text="" />
             </HBox>
         </HBox>
     </top>
@@ -226,7 +226,7 @@
                         </HBox>
 
                         <VBox prefWidth="140" minWidth="140" alignment="CENTER_LEFT">
-                            <Label text="Mario Rossi" styleClass="activity-assigned"/>
+                            <Label text="Utente sconosciuto" styleClass="activity-assigned"/>
                         </VBox>
 
                         <Region HBox.hgrow="ALWAYS" />

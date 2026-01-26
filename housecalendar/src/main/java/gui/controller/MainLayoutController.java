@@ -67,6 +67,7 @@ public class MainLayoutController {
     @FXML private ToggleButton filtroPersonali;
     @FXML private ToggleButton filtroCondivise;
     @FXML private MenuButton menuRicerca;
+    @FXML private MenuButton menuUtente;
     @FXML private Button btnAggiungi;
 
     private final AttivitaGestioneImp gestione = new AttivitaGestioneImp();
@@ -109,6 +110,7 @@ public class MainLayoutController {
         preparaRicerca();
         preparaAzioniHeader();
         preparaBottoneAggiungi();
+        configuraMenuUtente();
 
         aggiornaCalendario();
         aggiornaLista();
@@ -159,21 +161,7 @@ public class MainLayoutController {
             }
         }
 
-        Platform.runLater(() -> {
-            if (contenitoreSchede == null || contenitoreSchede.getScene() == null) {
-                return;
-            }
-            Parent root = contenitoreSchede.getScene().getRoot();
-            MenuButton menuUtente = (MenuButton) root.lookup(".user-menu");
-            if (menuUtente != null && menuUtente.getItems().isEmpty()) {
-                if (utenteCorrente != null) {
-                    menuUtente.setText(utenteCorrente.getNome() + " ▼");
-                }
-                MenuItem logout = new MenuItem("Logout");
-                logout.setOnAction(evento -> azioneLogout());
-                menuUtente.getItems().addAll(logout);
-            }
-        });
+        Platform.runLater(this::configuraMenuUtente);
     }
 
     private void preparaBottoneAggiungi() {
@@ -287,8 +275,14 @@ public class MainLayoutController {
         boxCheck.setMinWidth(90);
         CheckBox checkCompletata = new CheckBox();
         checkCompletata.setSelected(attivita.isCompletato());
-        checkCompletata.setDisable(attivita.isAttivitaPrivata() && !isProprietario(attivita));
+        boolean owner = isProprietario(attivita);
+        checkCompletata.setDisable(!owner);
         checkCompletata.setOnAction(evento -> {
+            if (!owner) {
+                checkCompletata.setSelected(attivita.isCompletato());
+                mostraErrore("Non puoi modificare lo stato di questa attività.");
+                return;
+            }
             boolean selezionata = checkCompletata.isSelected();
             if (selezionata) {
                 if (!attivitaIniziata(attivita)) {
@@ -495,15 +489,21 @@ public class MainLayoutController {
         try {
             if (contenitoreSchede != null && contenitoreSchede.getScene() != null) {
                 Stage stage = (Stage) contenitoreSchede.getScene().getWindow();
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/view/login.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui/view/loginForm.fxml"));
                 Parent root = loader.load();
-                double width = stage.getWidth() > 0 ? stage.getWidth() : 1500;
-                double height = stage.getHeight() > 0 ? stage.getHeight() : 800;
-                stage.setScene(new Scene(root, width, height));
-                stage.setTitle("Login");
-                stage.setResizable(true);
-                stage.setMinWidth(1500);
-                stage.setMinHeight(800);
+                stage.setScene(new Scene(root, 1600, 900));
+                stage.setTitle("Accedi");
+                stage.setResizable(false);
+                stage.setMaximized(false);
+                stage.setFullScreen(false);
+                stage.setMinWidth(1600);
+                stage.setMinHeight(900);
+                stage.setMaxWidth(1600);
+                stage.setMaxHeight(900);
+                stage.setWidth(1600);
+                stage.setHeight(900);
+                stage.show();
+                javafx.application.Platform.runLater(stage::centerOnScreen);
             }
         } catch (Exception ex) {
             mostraErrore("Errore logout.");
@@ -609,20 +609,18 @@ public class MainLayoutController {
             mostraErrore("Devi effettuare il login per modificare attivita.");
             return;
         }
-        Stage owner = getStage();
-        List<Utente> utenti = gestione.getUtentiDisponibili();
-        if (attivita.isAttivitaPrivata() && !isProprietario(attivita)) {
-            mostraErrore("Non puoi modificare attivita personali di altri utenti.");
+        if (!isProprietario(attivita)) {
+            mostraErrore("Puoi modificare solo le tue attivita.");
             return;
         }
-        Utente utenteDialogo = isProprietario(attivita) ? utenteCorrente : attivita.getUtenteAssegnato();
+        Stage owner = getStage();
+        List<Utente> utenti = gestione.getUtentiDisponibili();
+        Utente utenteDialogo = utenteCorrente;
         Optional<java.util.Map<String, Object>> risultato = DialogoAttivita.mostra(owner, "Modifica attivita", attivita, utenti, utenteDialogo);
         risultato.ifPresent(parametri -> {
             try {
-                if (isProprietario(attivita) && utenteCorrente != null) {
+                if (utenteCorrente != null) {
                     parametri.put("utenteAssegnato", utenteCorrente);
-                } else {
-                    parametri.put("utenteAssegnato", attivita.getUtenteAssegnato());
                 }
                 gestione.modificaAttivita(attivita.getId(), parametri);
                 aggiornaLista();
@@ -638,8 +636,8 @@ public class MainLayoutController {
             mostraErrore("Devi effettuare il login per eliminare attivita.");
             return;
         }
-        if (attivita.isAttivitaPrivata() && !isProprietario(attivita)) {
-            mostraErrore("Non puoi eliminare attivita personali di altri utenti.");
+        if (!isProprietario(attivita)) {
+            mostraErrore("Puoi eliminare solo le tue attivita.");
             return;
         }
         Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
@@ -846,20 +844,35 @@ public class MainLayoutController {
         return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 
+
     public void impostaUtenteCorrente(Utente utente) {
         this.utenteCorrente = utente;
-        Platform.runLater(() -> {
-            if (contenitoreSchede == null || contenitoreSchede.getScene() == null) {
-                return;
-            }
-            Parent root = contenitoreSchede.getScene().getRoot();
-            MenuButton menuUtente = (MenuButton) root.lookup(".user-menu");
-            if (menuUtente != null && utenteCorrente != null) {
-                menuUtente.setText(utenteCorrente.getNome() + " ▼");
-            }
-        });
+        configuraMenuUtente();
+    }
+
+    private void aggiornaMenuUtente() {
+        if (menuUtente == null) {
+            return;
+        }
+        String nome = (utenteCorrente != null && utenteCorrente.getNome() != null && !utenteCorrente.getNome().isBlank())
+                ? utenteCorrente.getNome()
+                : "Utente sconosciuto";
+        menuUtente.setText(nome + " ▼");
+    }
+
+    private void configuraMenuUtente() {
+        if (menuUtente == null) return;
+        if (menuUtente.getItems().isEmpty()) {
+            MenuItem logout = new MenuItem("Logout");
+            logout.setOnAction(evento -> azioneLogout());
+            menuUtente.getItems().add(logout);
+        }
+        aggiornaMenuUtente();
+        menuUtente.setDisable(false);
     }
 
     private record IntervalloDate(LocalDateTime inizio, LocalDateTime fine) {}
+
+ 
 }
 
