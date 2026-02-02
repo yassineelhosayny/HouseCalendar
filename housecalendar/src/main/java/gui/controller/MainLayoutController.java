@@ -115,6 +115,7 @@ public class MainLayoutController {
         aggiornaCalendario();
         aggiornaLista();
 
+        //avvio timer dopo caricamento gui
         Platform.runLater(this::avviaTimerNotifiche);
         Platform.runLater(this::avviaTimerStato);
     }
@@ -180,6 +181,7 @@ public class MainLayoutController {
         lista = applicaFiltri(lista);
 
         if (lista.isEmpty()) {
+            //placeholder quando non ci sono attivita
             Label vuoto = new Label("Nessuna attivita.");
             vuoto.getStyleClass().add("empty-table-label");
             contenitoreSchede.getChildren().add(vuoto);
@@ -276,6 +278,7 @@ public class MainLayoutController {
         CheckBox checkCompletata = new CheckBox();
         checkCompletata.setSelected(attivita.isCompletato());
         boolean owner = isProprietario(attivita);
+        //checkbox bloccata per chinon e proprietario
         checkCompletata.setDisable(!owner);
         checkCompletata.setOnAction(evento -> {
             if (!owner) {
@@ -577,6 +580,7 @@ public class MainLayoutController {
             campoRicerca.clear();
             campoRicerca.setPromptText(prompt);
         }
+        //refresh lista con nuovo filtro ricerca
         aggiornaLista();
     }
 
@@ -739,6 +743,7 @@ public class MainLayoutController {
         if (timerNotifiche != null) {
             timerNotifiche.stop();
         }
+        //ping notifiche ogni 45 secondi "meno  " 
         timerNotifiche = new Timeline(new KeyFrame(Duration.seconds(45), evento -> controllaNotifiche()));
         timerNotifiche.setCycleCount(Timeline.INDEFINITE);
         timerNotifiche.play();

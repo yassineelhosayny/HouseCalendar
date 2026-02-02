@@ -29,6 +29,7 @@ public class MainApp extends Application {
             utente = UtenteDAO.getUtenteByEmail(email);
         }
 
+        //decidese mostrare login o layout
         if (utente != null) {
             mostraLayout(finestra, utente);
         } else {
