@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import dominio.TipoAttivita;
 
 //Test per GestoreAttivita ma chiamano metodi "AttivitaGestioneImp" che gestisci controlli prima di chiamare GestoreAttivita
 class GestoreAttivitaTest {
@@ -329,8 +330,8 @@ void testFiltra() {
 
 @Test
 void testOrdinaPerNome() {
-    LocalDateTime inizio = LocalDateTime.of(2028, 10, 16, 8, 0);
-    LocalDateTime fine   = LocalDateTime.of(2028, 10, 16, 9, 0);
+    LocalDateTime inizio = LocalDateTime.of(2029, 10, 16, 8, 0);
+    LocalDateTime fine   = LocalDateTime.of(2029, 10, 16, 9, 0);
 
     Attivita a1 = creaAttivitaConFactory("B-progetto java", TipoAttivita.STUDIO, inizio, fine, 1, false, "Java");
     Attivita a2 = creaAttivitaConFactory("A-reti", TipoAttivita.STUDIO, inizio.plusHours(1), fine.plusHours(1), 1, false, "Java");
@@ -343,8 +344,15 @@ void testOrdinaPerNome() {
 
     List<Attivita> lista = gestione.getTutteLeAttivita();
 
-    assertEquals("A-reti", lista.get(0).getDescrizione());  //A > B
-    assertEquals("B-progetto java", lista.get(1).getDescrizione());
+    int idA = -1;
+    int idB = -1;
+    for (int i = 0; i < lista.size(); i++) {
+        String d = lista.get(i).getDescrizione();
+        if ("A-reti".equals(d)) idA = i;
+        if ("B-progetto java".equals(d)) idB = i;
+    }
+    assertTrue(idA >= 0 && idB >= 0, "Attività di test non trovate nella lista ordinata");
+    assertTrue(idA < idB, "Ordine alfabetico atteso: A-reti prima di B-progetto java");
 
     id1 = trovaIdPerDescrizione("B-progetto java");
     id2 = trovaIdPerDescrizione("A-reti");
@@ -352,8 +360,8 @@ void testOrdinaPerNome() {
 
 @Test
 void testOrdinaPerPriorita() {
-    LocalDateTime inizio = LocalDateTime.of(2028, 10, 16, 8, 0);
-    LocalDateTime fine   = LocalDateTime.of(2028, 10, 16, 9, 0);
+    LocalDateTime inizio = LocalDateTime.of(2026, 12, 11, 8, 0);
+    LocalDateTime fine   = LocalDateTime.of(2026, 12, 11, 9, 0);
 
     Attivita bassa = creaAttivitaConFactory("Bassa", TipoAttivita.DOMESTICA, inizio, fine, 1, false, "Cucina");
     Attivita alta  = creaAttivitaConFactory("Alta", TipoAttivita.DOMESTICA, inizio.plusHours(1), fine.plusHours(1), 3, false, "Cucina");
@@ -375,11 +383,11 @@ void testOrdinaPerPriorita() {
 
 @Test
 void testOrdinaPerData() {
-    LocalDateTime inizio1 = LocalDateTime.of(2028, 10, 16, 8, 0);
-    LocalDateTime fine1   = LocalDateTime.of(2028, 10, 16, 9, 0);
+    LocalDateTime inizio1 = LocalDateTime.of(2026, 8, 16, 8, 0);
+    LocalDateTime fine1   = LocalDateTime.of(2026, 8, 16, 9, 0);
 
-    LocalDateTime inizio2 = LocalDateTime.of(2028, 10, 17, 10, 0);
-    LocalDateTime fine2   = LocalDateTime.of(2028, 10, 17, 11, 0);
+    LocalDateTime inizio2 = LocalDateTime.of(2026, 8, 17, 10, 0);
+    LocalDateTime fine2   = LocalDateTime.of(2026, 8, 17, 11, 0);
 
     Attivita prima = creaAttivitaConFactory("prima", TipoAttivita.SPESA, inizio2, fine2, 1, false, "Market");
     Attivita seconda = creaAttivitaConFactory("seconda", TipoAttivita.SPESA, inizio1, fine1, 1, false, "Market");

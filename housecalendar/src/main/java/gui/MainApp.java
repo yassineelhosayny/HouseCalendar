@@ -14,8 +14,8 @@ import javafx.stage.Stage;
 
 public class MainApp extends Application {
 
-    private static final double NORMAL_WIDTH = 1600;
-    private static final double NORMAL_HEIGHT = 900;
+    private static final double NORMAL_WIDTH = 1800;
+    private static final double NORMAL_HEIGHT = 1000;
 
     private double normalX = Double.NaN;
     private double normalY = Double.NaN;

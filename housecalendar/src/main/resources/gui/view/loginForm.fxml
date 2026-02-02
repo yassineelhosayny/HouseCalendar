@@ -30,6 +30,5 @@
             <Button layoutX="40.0" layoutY="315.0" mnemonicParsing="false" onAction="#vaiRegistrazione" prefHeight="36.0" prefWidth="360.0" style="-fx-background-color: #111111; -fx-background-radius: 10; -fx-font-weight: bold;" text="Crea Account" textFill="#ffffff" />
          </children>
       </AnchorPane>
-      <Label layoutX="170.0" layoutY="760.0" text="Tutti i diritti riservati (c)" textFill="#3f3f3f" />
    </children>
 </AnchorPane>

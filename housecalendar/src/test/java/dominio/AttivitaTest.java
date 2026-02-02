@@ -1,5 +1,6 @@
 package dominio;
 
+import dominio.TipoAttivita;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
